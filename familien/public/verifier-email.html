@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vérification email — DésirParent</title>
+  <link rel="canonical" href="https://www.desirparent.com/verifier-email">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #fdf4f8 0%, #fff8f0 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 32px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(232,24,90,0.1);
+      text-align: center;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 800;
+      color: #E8185A;
+      margin-bottom: 24px;
+    }
+    .icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+      display: block;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 12px;
+    }
+    p {
+      color: #666;
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .btn {
+      display: inline-block;
+      background: #E8185A;
+      color: #fff;
+      text-decoration: none;
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #c8154f; }
+    .btn-outline {
+      background: transparent;
+      color: #E8185A;
+      border: 2px solid #E8185A;
+      margin-top: 12px;
+    }
+    .btn-outline:hover { background: #fdf4f8; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #fce4ec;
+      border-top-color: #E8185A;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #state-loading, #state-success, #state-error { display: none; }
+    #state-loading.active, #state-success.active, #state-error.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">DésirParent 💝</div>
+
+    <!-- Loading -->
+    <div id="state-loading">
+      <div class="spinner"></div>
+      <h1>Vérification en cours…</h1>
+      <p>Quelques secondes.</p>
+    </div>
+
+    <!-- Success -->
+    <div id="state-success">
+      <span class="icon">✅</span>
+      <h1>Email confirmé !</h1>
+      <p>Votre profil est maintenant visible dans le fil Découvrir. Bienvenue sur DésirParent !</p>
+      <a href="/decouvrir" class="btn">Voir le fil Découvrir</a>
+      <a href="/profil" class="btn btn-outline">Mon profil</a>
+    </div>
+
+    <!-- Already verified -->
+    <div id="state-already">
+      <span class="icon">👍</span>
+      <h1>Déjà vérifié</h1>
+      <p>Votre email est déjà confirmé. Vous pouvez continuer à utiliser DésirParent normalement.</p>
+      <a href="/decouvrir" class="btn">Continuer</a>
+    </div>
+
+    <!-- Error -->
+    <div id="state-error">
+      <span class="icon">⚠️</span>
+      <h1 id="error-title">Lien invalide</h1>
+      <p id="error-msg">Ce lien de vérification est invalide ou a expiré. Connectez-vous pour demander un nouveau lien.</p>
+      <a href="/connexion" class="btn">Se connecter</a>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+
+    function show(id) {
+      ['state-loading','state-success','state-already','state-error'].forEach(s => {
+        document.getElementById(s).className = s === id ? 'active' : '';
+      });
+    }
+
+    async function verify() {
+      if (!token) {
+        show('state-error');
+        document.getElementById('error-title').textContent = 'Lien manquant';
+        document.getElementById('error-msg').textContent = 'Aucun token de vérification trouvé dans le lien.';
+        return;
+      }
+
+      show('state-loading');
+
+      try {
+        const res = await fetch('/api/auth/verify-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          if (data.already_verified) {
+            show('state-already');
+          } else {
+            show('state-success');
+          }
+        } else {
+          show('state-error');
+          if (data.error) {
+            document.getElementById('error-msg').textContent = data.error;
+          }
+        }
+      } catch (err) {
+        show('state-error');
+        document.getElementById('error-msg').textContent = 'Erreur réseau. Réessayez.';
+      }
+    }
+
+    verify();
+  </script>
+</body>
+</html>

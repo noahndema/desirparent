@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — DésirParent</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink: #E8185A;
+      --pink-light: #fce4ec;
+      --orange: #F5922A;
+      --orange-light: #fff3e0;
+      --bg: #F7F8FC;
+      --white: #ffffff;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --purple: #7c3aed;
+      --purple-light: #ede9fe;
+      --teal: #0891b2;
+      --teal-light: #e0f2fe;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Login ─────────────────────────────── */
+    #login-view {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    .login-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .login-logo span {
+      font-size: 2rem;
+    }
+
+    .login-logo h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 0.5rem;
+    }
+
+    .login-logo p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .login-card label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .login-card input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .login-card input:focus {
+      border-color: var(--pink);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, var(--pink), var(--orange));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1.25rem;
+      transition: opacity 0.2s;
+    }
+
+    .login-btn:hover { opacity: 0.9; }
+    .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .login-error {
+      background: #fee2e2;
+      color: #dc2626;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    /* ── Dashboard ──────────────────────────── */
+    #dashboard-view { display: none; }
+
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .topbar-brand span { font-size: 1.5rem; }
+
+    .topbar-brand h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .topbar-brand p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .badge-live {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--success-light);
+      color: var(--success);
+      padding: 0.25rem 0.75rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-live::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .logout-btn {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0.375rem 0.875rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+      border-color: var(--pink);
+      color: var(--pink);
+    }
+
+    .main-content {
+      padding: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-title {
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── Stat Cards ─────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid var(--border);
+      transition: box-shadow 0.2s;
+    }
+
+    .stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+
+    .stat-card.featured {
+      background: linear-gradient(135deg, var(--pink), var(--orange));
+      color: white;
+      border: none;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-card.featured .stat-label { color: rgba(255,255,255,0.8); }
+
+    .stat-value {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-card.featured .stat-value { color: white; }
+
+    .stat-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .stat-card.featured .stat-sub { color: rgba(255,255,255,0.8); }
+
+    .stat-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── Charts Grid ────────────────────────── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    .chart-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .chart-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .chart-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 220px;
+    }
+
+    .chart-wrap.tall { height: 260px; }
+
+    /* ── Recent Table ───────────────────────── */
+    .table-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .table-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .admin-table th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .admin-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #f3f4f6;
+      color: var(--text);
+    }
+
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: #fafafa; }
+
+    .cat-badge {
+      display: inline-block;
+      background: var(--pink-light);
+      color: var(--pink);
+      border-radius: 99px;
+      padding: 0.125rem 0.6rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin: 0.1rem;
+      white-space: nowrap;
+    }
+
+    .cat-badge.orange { background: var(--orange-light); color: var(--orange); }
+    .cat-badge.purple { background: var(--purple-light); color: var(--purple); }
+    .cat-badge.teal { background: var(--teal-light); color: var(--teal); }
+
+    /* ── Loading ────────────────────────────── */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--pink);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 0.75rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Responsive ─────────────────────────── */
+    @media (max-width: 640px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat-value { font-size: 1.75rem; }
+      .main-content { padding: 1rem; }
+    }
+
+    @media (max-width: 380px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN VIEW ────────────────────────────────────────── -->
+<div id="login-view">
+  <div class="login-card">
+    <div class="login-logo">
+      <span>💗</span>
+      <h1>DésirParent</h1>
+      <p>Administration</p>
+    </div>
+    <div>
+      <label for="admin-password">Mot de passe admin</label>
+      <input type="password" id="admin-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Accéder au tableau de bord</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ── DASHBOARD VIEW ─────────────────────────────────────── -->
+<div id="dashboard-view">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <span>💗</span>
+      <div>
+        <h1>DésirParent</h1>
+        <p>Administration</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="badge-live">Live</div>
+      <button class="logout-btn" onclick="doLogout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div id="dashboard-loading" class="loading">
+      <div class="spinner"></div>
+      Chargement des données…
+    </div>
+
+    <div id="dashboard-content" style="display:none">
+      <h2 class="page-title">Tableau de bord</h2>
+      <p class="page-subtitle" id="page-subtitle">Dernière mise à jour : maintenant</p>
+
+      <!-- KPI Cards -->
+      <div class="stats-grid">
+        <div class="stat-card featured">
+          <div class="stat-icon">👥</div>
+          <div class="stat-label">Total inscrits</div>
+          <div class="stat-value" id="kpi-total">—</div>
+          <div class="stat-sub">membres enregistrés</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-label">Aujourd'hui</div>
+          <div class="stat-value" id="kpi-today">—</div>
+          <div class="stat-sub">nouvelles inscriptions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📆</div>
+          <div class="stat-label">Cette semaine</div>
+          <div class="stat-value" id="kpi-week">—</div>
+          <div class="stat-sub">depuis lundi</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🗓️</div>
+          <div class="stat-label">Ce mois</div>
+          <div class="stat-value" id="kpi-month">—</div>
+          <div class="stat-sub">depuis le 1er</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="chart-card full-width">
+          <div class="chart-title">📈 Courbe de croissance — 60 derniers jours</div>
+          <div class="chart-wrap tall">
+            <canvas id="growth-chart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">🎯 Répartition par catégorie</div>
+          <div class="chart-wrap">
+            <canvas id="cat-chart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">📊 Inscriptions par catégorie</div>
+          <div class="chart-wrap">
+            <canvas id="cat-bar-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- New widgets: Gender + Subscription -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">⚥ Répartition par genre</div>
+          <div class="chart-wrap">
+            <canvas id="gender-chart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">💎 Répartition par abonnement</div>
+          <div class="chart-wrap">
+            <canvas id="sub-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Signups -->
+      <div class="table-card">
+        <div class="table-title">🆕 Dernières inscriptions</div>
+        <div style="overflow-x:auto">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Prénom</th>
+                <th>Âge</th>
+                <th>Ville</th>
+                <th>Pays</th>
+                <th>Genre</th>
+                <th>Catégories</th>
+                <th>Inscrit le</th>
+              </tr>
+            </thead>
+            <tbody id="recent-tbody">
+              <tr><td colspan="7" style="text-align:center;color:#6b7280;padding:1.5rem">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tools Card -->
+      <div class="table-card" style="margin-bottom:2rem;">
+        <div class="table-title">🛠️ Outils admin</div>
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding:0.25rem 0;">
+          <div style="flex:1;min-width:260px;">
+            <p style="margin:0 0 4px;font-size:0.875rem;font-weight:600;color:var(--text);">Email de confirmation paiement</p>
+            <p style="margin:0;font-size:0.8rem;color:var(--text-muted);">Envoie un email de test à l'adresse admin avec des données fictives — pour prévisualiser le rendu exact.</p>
+          </div>
+          <button id="test-email-btn" onclick="sendTestEmail()" style="
+            display:inline-flex;align-items:center;gap:0.5rem;
+            background:linear-gradient(135deg,var(--pink),var(--orange));
+            color:#fff;border:none;border-radius:10px;
+            padding:0.625rem 1.25rem;font-size:0.875rem;font-weight:600;
+            cursor:pointer;white-space:nowrap;transition:opacity 0.2s;
+            box-shadow:0 2px 8px rgba(232,24,90,0.25);
+          ">
+            <span>📧</span> Envoyer un email test
+          </button>
+        </div>
+        <div id="test-email-result" style="display:none;margin-top:0.75rem;padding:0.75rem 1rem;border-radius:8px;font-size:0.85rem;"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const PINK = '#E8185A';
+  const ORANGE = '#F5922A';
+  const PURPLE = '#7c3aed';
+  const TEAL = '#0891b2';
+  const GREEN = '#10b981';
+
+  const CAT_COLORS = {
+    'Géniteur': TEAL,
+    'Coparentalité': PINK,
+    'Homoparentalité': PURPLE,
+    'Fonder une Famille': ORANGE,
+    'Famille Recomposée': GREEN
+  };
+
+  const CAT_BADGE_CLASS = {
+    'Géniteur': 'teal',
+    'Coparentalité': '',
+    'Homoparentalité': 'purple',
+    'Fonder une Famille': 'orange',
+    'Famille Recomposée': ''
+  };
+
+  let growthChartInst = null;
+  let catChartInst = null;
+  let catBarInst = null;
+  let genderChartInst = null;
+  let subChartInst = null;
+
+  async function doLogin() {
+    const password = document.getElementById('admin-password').value;
+    const btn = document.getElementById('login-btn');
+    const errEl = document.getElementById('login-error');
+
+    if (!password) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Connexion…';
+    errEl.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        errEl.textContent = data.error || 'Mot de passe incorrect';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Accéder au tableau de bord';
+        return;
+      }
+
+      showDashboard();
+    } catch (e) {
+      errEl.textContent = 'Erreur réseau';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Accéder au tableau de bord';
+    }
+  }
+
+  async function doLogout() {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    document.getElementById('dashboard-view').style.display = 'none';
+    document.getElementById('login-view').style.display = 'flex';
+    document.getElementById('admin-password').value = '';
+    document.getElementById('login-btn').disabled = false;
+    document.getElementById('login-btn').textContent = 'Accéder au tableau de bord';
+  }
+
+  function showDashboard() {
+    document.getElementById('login-view').style.display = 'none';
+    document.getElementById('dashboard-view').style.display = 'block';
+    loadStats();
+  }
+
+  async function loadStats() {
+    document.getElementById('dashboard-loading').style.display = 'flex';
+    document.getElementById('dashboard-content').style.display = 'none';
+
+    try {
+      const res = await fetch('/api/admin/stats');
+      if (!res.ok) throw new Error('Unauthorized');
+      const data = await res.json();
+
+      renderStats(data);
+
+      document.getElementById('dashboard-loading').style.display = 'none';
+      document.getElementById('dashboard-content').style.display = 'block';
+
+      const now = new Date();
+      document.getElementById('page-subtitle').textContent =
+        'Dernière mise à jour : ' + now.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      document.getElementById('dashboard-loading').innerHTML = '<p style="color:#dc2626">Erreur de chargement. <a href="/admin" style="color:#E8185A">Recharger</a></p>';
+    }
+  }
+
+  function renderStats(data) {
+    // KPIs
+    document.getElementById('kpi-total').textContent = data.total.toLocaleString('fr-FR');
+    document.getElementById('kpi-today').textContent = data.today.toLocaleString('fr-FR');
+    document.getElementById('kpi-week').textContent = data.week.toLocaleString('fr-FR');
+    document.getElementById('kpi-month').textContent = data.month.toLocaleString('fr-FR');
+
+    // Growth chart
+    renderGrowthChart(data.growth);
+
+    // Category charts
+    renderCategoryCharts(data.categories);
+
+    // Gender chart
+    renderGenderChart(data.genders || []);
+
+    // Subscription chart
+    renderSubscriptionChart(data.subscriptions || []);
+
+    // Recent table
+    renderRecentTable(data.recent);
+  }
+
+  function renderGrowthChart(growth) {
+    if (growthChartInst) growthChartInst.destroy();
+
+    // Fill in missing days
+    const today = new Date();
+    const days = [];
+    const counts = {};
+    growth.forEach(r => { counts[r.date] = parseInt(r.count); });
+
+    let cumulative = 0;
+    const cumulativeData = [];
+    const dailyData = [];
+    const labels = [];
+
+    for (let i = 59; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().split('T')[0];
+      const dayCount = counts[key] || 0;
+      cumulative += dayCount;
+      labels.push(formatDateLabel(d));
+      dailyData.push(dayCount);
+      cumulativeData.push(cumulative);
+    }
+
+    const ctx = document.getElementById('growth-chart').getContext('2d');
+    growthChartInst = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Inscriptions cumulées',
+            data: cumulativeData,
+            borderColor: PINK,
+            backgroundColor: 'rgba(232, 24, 90, 0.08)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            yAxisID: 'y',
+            borderWidth: 2.5
+          },
+          {
+            label: 'Nouvelles inscriptions',
+            data: dailyData,
+            borderColor: ORANGE,
+            backgroundColor: 'rgba(245, 146, 42, 0.15)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            yAxisID: 'y1',
+            borderWidth: 1.5,
+            borderDash: [4, 2]
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { maxTicksLimit: 10, font: { size: 11 } }
+          },
+          y: {
+            position: 'left',
+            grid: { color: '#f3f4f6' },
+            ticks: { font: { size: 11 } }
+          },
+          y1: {
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            ticks: { font: { size: 11 } }
+          }
+        },
+        plugins: {
+          legend: { position: 'top', labels: { font: { size: 11 }, usePointStyle: true } }
+        }
+      }
+    });
+  }
+
+  function renderCategoryCharts(categories) {
+    if (catChartInst) catChartInst.destroy();
+    if (catBarInst) catBarInst.destroy();
+
+    const labels = categories.map(c => c.cat);
+    const values = categories.map(c => parseInt(c.count));
+    const colors = labels.map(l => CAT_COLORS[l] || '#9ca3af');
+
+    // Donut
+    const ctx1 = document.getElementById('cat-chart').getContext('2d');
+    catChartInst = new Chart(ctx1, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: { position: 'right', labels: { font: { size: 11 }, usePointStyle: true, padding: 12 } }
+        }
+      }
+    });
+
+    // Bar
+    const ctx2 = document.getElementById('cat-bar-chart').getContext('2d');
+    catBarInst = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Membres',
+          data: values,
+          backgroundColor: colors,
+          borderRadius: 6,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 } } },
+          y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        }
+      }
+    });
+  }
+
+  function renderGenderChart(genders) {
+    if (genderChartInst) genderChartInst.destroy();
+
+    const GENDER_COLORS = {
+      'Femme': PINK,
+      'Homme': TEAL,
+      'Autre': PURPLE,
+      'Non-binaire': PURPLE,
+      'Non renseigné': '#9ca3af'
+    };
+
+    const total = genders.reduce((s, g) => s + parseInt(g.count), 0);
+    const labels = genders.map(g => {
+      const pct = total > 0 ? Math.round(parseInt(g.count) / total * 100) : 0;
+      return `${g.gender} (${pct}%)`;
+    });
+    const values = genders.map(g => parseInt(g.count));
+    const colors = genders.map(g => GENDER_COLORS[g.gender] || '#9ca3af');
+
+    const ctx = document.getElementById('gender-chart').getContext('2d');
+    genderChartInst = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: { font: { size: 11 }, usePointStyle: true, padding: 12 }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.raw} membres`
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function renderSubscriptionChart(subscriptions) {
+    if (subChartInst) subChartInst.destroy();
+
+    const SUB_LABELS = { free: 'Gratuit', standard: 'Standard', premium: 'Premium' };
+    const SUB_COLORS = { free: GREEN, standard: ORANGE, premium: PINK };
+
+    // Ensure all 3 tiers are shown even if count = 0
+    const tiers = ['premium', 'standard', 'free'];
+    const subMap = {};
+    subscriptions.forEach(s => { subMap[s.tier] = parseInt(s.count); });
+
+    const labels = tiers.map(t => SUB_LABELS[t] || t);
+    const values = tiers.map(t => subMap[t] || 0);
+    const colors = tiers.map(t => SUB_COLORS[t] || '#9ca3af');
+
+    const ctx = document.getElementById('sub-chart').getContext('2d');
+    subChartInst = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Membres',
+          data: values,
+          backgroundColor: colors,
+          borderRadius: 6,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.raw} membres`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: '#f3f4f6' },
+            ticks: { font: { size: 11 }, precision: 0 }
+          },
+          y: { grid: { display: false }, ticks: { font: { size: 12 } } }
+        }
+      }
+    });
+  }
+
+  function renderRecentTable(recent) {
+    const tbody = document.getElementById('recent-tbody');
+    if (!recent || recent.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#6b7280;padding:1.5rem">Aucune inscription récente</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = recent.map(u => {
+      const cats = (typeof u.categories === 'string' ? JSON.parse(u.categories) : (u.categories || []));
+      const catBadges = cats.map(c =>
+        `<span class="cat-badge ${CAT_BADGE_CLASS[c] || ''}">${c}</span>`
+      ).join('');
+      const date = new Date(u.created_at);
+      const dateStr = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      return `<tr>
+        <td><strong>${escHtml(u.name || '—')}</strong></td>
+        <td>${u.age || '—'}</td>
+        <td>${escHtml(u.city || '—')}</td>
+        <td>${u.country ? escHtml(u.country) : '<span style="color:#9ca3af;font-style:italic">Non renseigné</span>'}</td>
+        <td>${u.gender ? escHtml(u.gender) : '<span style="color:#9ca3af;font-style:italic">—</span>'}</td>
+        <td>${catBadges || '<span style="color:#9ca3af">—</span>'}</td>
+        <td style="color:#6b7280;font-size:0.8rem">${dateStr}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function formatDateLabel(d) {
+    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // Handle enter key on password input
+  document.getElementById('admin-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  // Check if already authenticated on page load
+  async function checkAuth() {
+    try {
+      const res = await fetch('/api/admin/check');
+      const data = await res.json();
+      if (data.authenticated) {
+        showDashboard();
+      }
+    } catch (e) {}
+  }
+
+  checkAuth();
+
+  async function sendTestEmail() {
+    const btn = document.getElementById('test-email-btn');
+    const result = document.getElementById('test-email-result');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;"></span> Envoi…';
+    result.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/admin/test-email', { method: 'POST' });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        result.style.background = 'var(--success-light)';
+        result.style.color = 'var(--success)';
+        result.style.border = '1px solid #a7f3d0';
+        result.innerHTML = '✅ ' + (data.message || 'Email envoyé avec succès !');
+      } else {
+        result.style.background = '#fee2e2';
+        result.style.color = '#dc2626';
+        result.style.border = '1px solid #fca5a5';
+        result.innerHTML = '❌ ' + (data.error || 'Erreur lors de l\'envoi.');
+      }
+      result.style.display = 'block';
+    } catch (e) {
+      result.style.background = '#fee2e2';
+      result.style.color = '#dc2626';
+      result.style.border = '1px solid #fca5a5';
+      result.innerHTML = '❌ Erreur réseau. Réessayez.';
+      result.style.display = 'block';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<span>📧</span> Envoyer un email test';
+  }
+</script>
+</body>
+</html>

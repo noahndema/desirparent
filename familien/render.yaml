@@ -1,0 +1,10 @@
+services:
+  - type: web
+    runtime: node
+    name: app
+    buildCommand: npm install
+    startCommand: npm run migrate && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production

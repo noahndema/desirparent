@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FDF8F0"/>
+      <stop offset="100%" stop-color="#F0E8FA"/>
+    </linearGradient>
+    <linearGradient id="heart" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#FB923C"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#3B074A" flood-opacity="0.10"/>
+    </filter>
+    <filter id="logo-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#3B074A" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Decorative blobs -->
+  <circle cx="1050" cy="-60" r="320" fill="#7C3AED" opacity="0.05"/>
+  <circle cx="150" cy="700" r="400" fill="#FB923C" opacity="0.05"/>
+  <circle cx="600" cy="315" r="260" fill="#7C3AED" opacity="0.03"/>
+
+  <!-- Main card -->
+  <rect x="60" y="60" width="1080" height="510" rx="32" fill="white" filter="url(#shadow)"/>
+
+  <!-- Top gradient bar -->
+  <rect x="60" y="60" width="1080" height="10" rx="32" fill="url(#heart)"/>
+  <rect x="60" y="66" width="1080" height="4" fill="url(#heart)"/>
+
+  <!-- Brand logo: heart icon + DésirParent text -->
+  <g filter="url(#logo-shadow)">
+    <rect x="90" y="95" width="52" height="52" rx="14" fill="url(#heart)"/>
+    <path d="M116 128C116 128 99 119 99 110.5C99 105 103 101 107.5 101C110.2 101 112.4 102.2 114.2 104.2C115.8 102.2 118 101 120.8 101C125 101 129 105 129 110.5C129 119 112 128 112 128H116Z" fill="white"/>
+  </g>
+  <text x="156" y="130" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="800" fill="#3B074A" letter-spacing="-0.03em">DésirParent</text>
+
+  <!-- Badge -->
+  <rect x="90" y="166" width="220" height="34" rx="17" fill="#F0E8FA" stroke="#7C3AED" stroke-opacity="0.25" stroke-width="1"/>
+  <circle cx="110" cy="183" r="5" fill="#7C3AED"/>
+  <text x="124" y="188" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" fill="#7C3AED">Plateforme francophone</text>
+
+  <!-- Headline -->
+  <text x="90" y="258" font-family="system-ui, -apple-system, sans-serif" font-size="52" font-weight="800" fill="#3B074A" letter-spacing="-0.03em">Trouvez votre</text>
+  <text x="90" y="318" font-family="system-ui, -apple-system, sans-serif" font-size="52" font-weight="800" fill="url(#heart)" letter-spacing="-0.03em">co-parent</text>
+
+  <!-- Sub-headline -->
+  <text x="90" y="368" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#6B7280" letter-spacing="-0.01em">La plateforme gratuite de coparentalité pour tous les francophones</text>
+
+  <!-- Divider -->
+  <line x1="90" y1="395" x2="560" y2="395" stroke="#E5E7EB" stroke-width="1"/>
+
+  <!-- Three features -->
+  <circle cx="118" cy="433" r="18" fill="#7C3AED" fill-opacity="0.1"/>
+  <text x="118" y="438" font-family="system-ui, -apple-system, sans-serif" font-size="16" text-anchor="middle">🛡️</text>
+  <text x="145" y="430" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#3B074A">Profils vérifiés</text>
+  <text x="145" y="446" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#9CA3AF">Modération manuelle</text>
+
+  <circle cx="316" cy="433" r="18" fill="#FB923C" fill-opacity="0.1"/>
+  <text x="316" y="438" font-family="system-ui, -apple-system, sans-serif" font-size="16" text-anchor="middle">🔒</text>
+  <text x="343" y="430" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#3B074A">100% sécurisé</text>
+  <text x="343" y="446" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#9CA3AF">Données protégées</text>
+
+  <circle cx="514" cy="433" r="18" fill="#F472B6" fill-opacity="0.1"/>
+  <text x="514" y="438" font-family="system-ui, -apple-system, sans-serif" font-size="16" text-anchor="middle">🌈</text>
+  <text x="541" y="430" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#3B074A">Tous les projets</text>
+  <text x="541" y="446" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#9CA3AF">Coparentalité, PMA, homo</text>
+
+  <!-- Right side: main logo illustration -->
+  <rect x="700" y="110" width="400" height="400" rx="28" fill="url(#bg)"/>
+
+  <!-- Big logo image (DésirParent official logo) -->
+  <image href="https://pub-629428d185ca4960a0a73c850d32294b.r2.dev/company_85746/images/7c223727-f7cb-43ae-b237-dc8a4f578078.jpeg" x="720" y="130" width="360" height="360" preserveAspectRatio="xMidYMid meet"/>
+
+  <!-- Small decorative dots -->
+  <circle cx="760" cy="160" r="6" fill="#7C3AED" opacity="0.3"/>
+  <circle cx="960" cy="180" r="4" fill="#FB923C" opacity="0.4"/>
+  <circle cx="740" cy="320" r="5" fill="#F472B6" opacity="0.3"/>
+  <circle cx="1000" cy="330" r="4" fill="#7C3AED" opacity="0.3"/>
+
+  <!-- URL badge -->
+  <text x="900" y="505" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" fill="#7C3AED" text-anchor="middle" letter-spacing="0.02em">www.desirparent.com</text>
+</svg>

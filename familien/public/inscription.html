@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription — DésirParent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+    <style>
+        .reg-page {
+            min-height: calc(100vh - 64px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .reg-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .reg-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--prune);
+            margin-bottom: 0.25rem;
+        }
+
+        .reg-sub {
+            color: var(--gray-500);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Steps indicator */
+        .steps-indicator {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .step-dot {
+            flex: 1;
+            height: 4px;
+            border-radius: 4px;
+            background: var(--gray-300);
+            transition: background 0.3s;
+        }
+
+        .step-dot.active { background: var(--lavande); }
+        .step-dot.done { background: var(--teal); }
+
+        /* Step containers */
+        .reg-step { display: none; }
+        .reg-step.active { display: block; }
+
+        .step-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--prune);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-title .num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--lavande);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .reg-nav {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .reg-nav .btn { flex: 1; }
+
+        /* Photo specific */
+        .photo-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .photo-area:hover {
+            border-color: var(--lavande);
+            background: rgba(124, 58, 237, 0.02);
+        }
+
+        .photo-area.has-photo {
+            border-style: solid;
+            border-color: var(--lavande);
+        }
+
+        .photo-thumb {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: none;
+            border: 3px solid var(--lavande);
+        }
+
+        .photo-area.has-photo .photo-thumb { display: block; }
+        .photo-area.has-photo .photo-placeholder { display: none; }
+
+        .photo-placeholder {
+            text-align: center;
+            color: var(--gray-400);
+        }
+
+        .photo-placeholder svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 0.5rem;
+        }
+
+        .photo-placeholder p {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .photo-placeholder small {
+            font-size: 0.8rem;
+            color: var(--gray-400);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--gray-500);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .auth-logo img {
+            height: 52px;
+            width: auto;
+            border-radius: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .reg-card { padding: 1.75rem; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="nav">
+        <a href="/" class="nav-logo">
+            <img src="/images/logo-transparent.png" alt="DésirParent">
+            <span class="nav-logo-text">DésirParent</span>
+        </a>
+        <div class="nav-links">
+            <a href="/connexion" class="nav-link nav-logged-out">Connexion</a>
+            <a href="/profil" class="nav-link nav-logged-in" style="display:none">Mon profil</a>
+            <a href="#" class="nav-link logout nav-logged-in logout-btn" style="display:none">Déconnexion</a>
+        </div>
+    </nav>
+
+    <main class="reg-page">
+        <div class="reg-card">
+            <div class="auth-logo"><img src="/images/logo-transparent.png" alt="DésirParent"></div>
+            <h1 class="reg-title">Créer mon profil</h1>
+            <p class="reg-sub">Rejoignez la communauté DésirParent en quelques étapes.</p>
+
+            <div class="steps-indicator">
+                <div class="step-dot active" data-step="1"></div>
+                <div class="step-dot" data-step="2"></div>
+                <div class="step-dot" data-step="3"></div>
+                <div class="step-dot" data-step="4"></div>
+            </div>
+
+            <div id="alert" class="alert"></div>
+
+            <!-- STEP 1: Account -->
+            <div class="reg-step active" data-step="1">
+                <div class="step-title"><span class="num">1</span> Votre compte</div>
+                <div class="form-group">
+                    <label class="form-label" for="name">Prénom</label>
+                    <input type="text" id="name" class="form-input" placeholder="Votre prénom" autocomplete="given-name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" id="email" class="form-input" placeholder="votre@email.com" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">Mot de passe</label>
+                    <input type="password" id="password" class="form-input" placeholder="8 caractères minimum" autocomplete="new-password" required>
+                    <div class="form-hint">Minimum 8 caractères</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Genre</label>
+                    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.5rem">
+                        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.9rem">
+                            <input type="radio" name="gender" value="Femme"> Femme
+                        </label>
+                        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.9rem">
+                            <input type="radio" name="gender" value="Homme"> Homme
+                        </label>
+                        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.9rem">
+                            <input type="radio" name="gender" value="" checked> Préfère ne pas dire
+                        </label>
+                    </div>
+                </div>
+                <div class="reg-nav">
+                    <button class="btn btn-primary btn-block" onclick="nextStep(1)">Continuer</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Details -->
+            <div class="reg-step" data-step="2">
+                <div class="step-title"><span class="num">2</span> À propos de vous</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="age">Âge</label>
+                        <input type="number" id="age" class="form-input" placeholder="30" min="18" max="99">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="city">Ville</label>
+                        <input type="text" id="city" class="form-input" placeholder="Paris" autocomplete="address-level2">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="country">Pays</label>
+                    <select id="country" class="form-input">
+                        <option value="">Sélectionnez votre pays</option>
+                        <option value="France" selected>France</option>
+                        <option value="Belgique">Belgique</option>
+                        <option value="Suisse">Suisse</option>
+                        <option value="Canada">Canada</option>
+                        <option value="Luxembourg">Luxembourg</option>
+                        <option value="Maroc">Maroc</option>
+                        <option value="Tunisie">Tunisie</option>
+                        <option value="Algérie">Algérie</option>
+                        <option value="République Démocratique du Congo">République Démocratique du Congo</option>
+                        <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                        <option value="Sénégal">Sénégal</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div class="reg-nav">
+                    <button class="btn btn-secondary" onclick="prevStep(2)">Retour</button>
+                    <button class="btn btn-primary" onclick="nextStep(2)">Continuer</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Photo -->
+            <div class="reg-step" data-step="3">
+                <div class="step-title"><span class="num">3</span> Votre photo</div>
+                <div class="photo-area" id="photoArea" onclick="document.getElementById('photoInput').click()">
+                    <img class="photo-thumb" id="photoThumb" src="" alt="Aperçu">
+                    <div class="photo-placeholder">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
+                        </svg>
+                        <p>Cliquez pour ajouter votre photo</p>
+                        <small>JPG ou PNG, max 5 Mo</small>
+                    </div>
+                </div>
+                <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)">
+                <div class="form-hint mt-1 text-center">Une photo de vous est requise pour créer votre profil.</div>
+                <div class="reg-nav">
+                    <button class="btn btn-secondary" onclick="prevStep(3)">Retour</button>
+                    <button class="btn btn-primary" onclick="nextStep(3)">Continuer</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Categories & Bio -->
+            <div class="reg-step" data-step="4">
+                <div class="step-title"><span class="num">4</span> Votre projet parental</div>
+                <div class="form-group">
+                    <label class="form-label">Catégorie(s)</label>
+                    <div class="form-hint mb-2">Sélectionnez une ou plusieurs catégories</div>
+                    <div class="cat-checks">
+                        <div class="cat-check" data-cat="geniteur">
+                            <input type="checkbox" id="cat-geniteur" value="Géniteur">
+                            <label for="cat-geniteur">🧬 Géniteur</label>
+                        </div>
+                        <div class="cat-check" data-cat="coparentalite">
+                            <input type="checkbox" id="cat-coparentalite" value="Coparentalité">
+                            <label for="cat-coparentalite">🤝 Coparentalité</label>
+                        </div>
+                        <div class="cat-check" data-cat="homoparentalite">
+                            <input type="checkbox" id="cat-homoparentalite" value="Homoparentalité">
+                            <label for="cat-homoparentalite">🌈 Homoparentalité</label>
+                        </div>
+                        <div class="cat-check" data-cat="fonder">
+                            <input type="checkbox" id="cat-fonder" value="Fonder une Famille">
+                            <label for="cat-fonder">👶 Fonder une Famille</label>
+                        </div>
+                        <div class="cat-check" data-cat="recomposee">
+                            <input type="checkbox" id="cat-recomposee" value="Famille Recomposée">
+                            <label for="cat-recomposee">🏡 Famille Recomposée</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="bio">Votre annonce</label>
+                    <textarea id="bio" class="form-input" rows="4" placeholder="Décrivez votre projet parental en 2-3 phrases. Qui êtes-vous ? Que recherchez-vous ?"></textarea>
+                    <div class="form-hint">2-3 phrases sur votre projet parental</div>
+                </div>
+                <div class="reg-nav">
+                    <button class="btn btn-secondary" onclick="prevStep(4)">Retour</button>
+                    <button class="btn btn-primary btn-block" id="submitBtn" onclick="submitRegistration()">
+                        Créer mon profil
+                    </button>
+                </div>
+            </div>
+
+            <div class="login-link">
+                Déjà inscrit·e ? <a href="/connexion">Se connecter</a>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+    <script>
+    let currentStep = 1;
+    let photoBase64 = null;
+
+    function goToStep(step) {
+        currentStep = step;
+        document.querySelectorAll('.reg-step').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.reg-step[data-step="${step}"]`).classList.add('active');
+
+        document.querySelectorAll('.step-dot').forEach(dot => {
+            const s = parseInt(dot.dataset.step);
+            dot.classList.remove('active', 'done');
+            if (s === step) dot.classList.add('active');
+            else if (s < step) dot.classList.add('done');
+        });
+        hideAlert('alert');
+    }
+
+    function nextStep(from) {
+        hideAlert('alert');
+
+        if (from === 1) {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!name) return showAlert('alert', 'Veuillez entrer votre prénom.');
+            if (!email) return showAlert('alert', 'Veuillez entrer votre email.');
+            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return showAlert('alert', 'Adresse email invalide.');
+            if (password.length < 8) return showAlert('alert', 'Le mot de passe doit contenir au moins 8 caractères.');
+        }
+
+        if (from === 3 && !photoBase64) {
+            return showAlert('alert', 'Une photo est requise pour créer votre profil.');
+        }
+
+        goToStep(from + 1);
+    }
+
+    function prevStep(from) {
+        goToStep(from - 1);
+    }
+
+    function handlePhoto(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            showAlert('alert', 'La photo ne doit pas dépasser 5 Mo.');
+            return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            showAlert('alert', 'Veuillez sélectionner une image (JPG ou PNG).');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            photoBase64 = e.target.result;
+            document.getElementById('photoThumb').src = photoBase64;
+            document.getElementById('photoArea').classList.add('has-photo');
+            hideAlert('alert');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function submitRegistration() {
+        hideAlert('alert');
+
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const age = document.getElementById('age').value;
+        const city = document.getElementById('city').value.trim();
+        const country = document.getElementById('country').value.trim();
+        const gender = document.querySelector('input[name="gender"]:checked')?.value || null;
+        const bio = document.getElementById('bio').value.trim();
+
+        const categories = [];
+        document.querySelectorAll('.cat-checks input:checked').forEach(cb => {
+            categories.push(cb.value);
+        });
+
+        if (categories.length === 0) {
+            return showAlert('alert', 'Sélectionnez au moins une catégorie.');
+        }
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span> Création en cours...';
+
+        try {
+            // 1. Register first (creates session cookie — required before photo upload)
+            const result = await API.register({
+                name, email, password, age: age || null,
+                city: city || null, country: country || null,
+                gender: gender || null, categories, bio: bio || null,
+                photo_url: null
+            });
+
+            // 2. Now upload photo (session cookie is set, requireAuth will pass)
+            if (photoBase64) {
+                try {
+                    const uploadResult = await API.uploadPhoto(photoBase64);
+                    if (uploadResult && uploadResult.url) {
+                        await API.updateProfile({ photo_url: uploadResult.url });
+                    }
+                } catch (photoErr) {
+                    // Photo failed but account is created — don't block the user
+                    console.warn('[reg] Photo upload failed, continuing:', photoErr.message);
+                }
+            }
+
+            // 3. Success — check if email verification required
+            if (result && result.email_verification_required) {
+                // Replace reg-card content with verification banner
+                const card = document.querySelector('.reg-card');
+                if (card) {
+                    card.innerHTML = `
+                        <div style="text-align:center;padding:8px 0">
+                          <div style="font-size:56px;margin-bottom:16px">📬</div>
+                          <h2 style="color:#1a1a2e;font-size:20px;font-weight:700;margin-bottom:12px">Confirmez votre email</h2>
+                          <p style="color:#666;font-size:15px;line-height:1.6;margin-bottom:24px">
+                            Un email de confirmation a été envoyé à <strong>${email}</strong>.<br>
+                            Cliquez sur le lien dans l'email pour que votre profil soit visible dans le fil Découvrir.
+                          </p>
+                          <a href="/decouvrir" style="display:block;background:#E8185A;color:#fff;text-decoration:none;padding:14px 32px;border-radius:10px;font-size:15px;font-weight:600;margin-bottom:12px">
+                            Continuer sans vérifier →
+                          </a>
+                          <p style="color:#aaa;font-size:13px;margin-top:16px">
+                            Votre profil sera masqué des autres membres jusqu'à confirmation.<br>
+                            Vérifiez vos spams si vous ne recevez pas l'email.
+                          </p>
+                        </div>
+                    `;
+                } else {
+                    window.location.href = '/decouvrir';
+                }
+            } else {
+                window.location.href = '/decouvrir';
+            }
+        } catch (err) {
+            showAlert('alert', err.message);
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Créer mon profil';
+        }
+    }
+
+    // If already logged in, redirect to profile
+    document.addEventListener('DOMContentLoaded', async () => {
+        const { loggedIn } = await checkAuth();
+        if (loggedIn) window.location.href = '/decouvrir';
+    });
+    </script>
+</body>
+</html>

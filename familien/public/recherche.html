@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recherche — DésirParent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="has-bottom-nav">
+
+    <!-- TOP NAV -->
+    <nav class="nav">
+        <a href="/" class="nav-logo">
+            <img src="/images/logo-transparent.png" alt="DésirParent">
+            <span class="nav-logo-text">DésirParent</span>
+        </a>
+        <div class="nav-links">
+            <a href="/connexion" class="nav-link nav-logged-out">Connexion</a>
+            <a href="/inscription" class="nav-link cta nav-logged-out">Créer mon profil</a>
+            <a href="/notifications" class="nav-link nav-bell nav-logged-in" id="headerBell" style="display:none">🔔</a>
+            <a href="#" class="nav-link logout nav-logged-in logout-btn" style="display:none">Déconnexion</a>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="feed-page">
+        <!-- Auth required -->
+        <div id="authRequired" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:2rem;gap:1.5rem">
+            <div style="font-size:3rem">🔒</div>
+            <h2 style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--prune)">Connectez-vous pour rechercher</h2>
+            <p style="color:var(--gray-500);max-width:360px">Accédez à la recherche avancée en créant votre compte.</p>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:center">
+                <a href="/connexion" class="btn btn-primary">Se connecter</a>
+                <a href="/inscription" class="btn btn-secondary">Créer un compte</a>
+            </div>
+        </div>
+
+        <!-- Search content -->
+        <div id="searchContent" class="hidden">
+            <div class="feed-container">
+                <div class="feed-title">🔍 Recherche</div>
+
+                <!-- Search bar -->
+                <div class="search-bar-wrap">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="searchQ" class="search-input" placeholder="Rechercher par prénom...">
+                </div>
+
+                <!-- Filters panel -->
+                <div class="search-filters-panel">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+                        <!-- Age range -->
+                        <div>
+                            <div class="search-filter-title">Âge minimum</div>
+                            <input type="number" id="ageMin" class="form-input" placeholder="18" min="18" max="99">
+                        </div>
+                        <div>
+                            <div class="search-filter-title">Âge maximum</div>
+                            <input type="number" id="ageMax" class="form-input" placeholder="70" min="18" max="99">
+                        </div>
+                    </div>
+
+                    <!-- Gender -->
+                    <div style="margin-top:1rem">
+                        <div class="search-filter-title">Genre</div>
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+                            <button class="filter-chip active" data-gender="all">Tous</button>
+                            <button class="filter-chip" data-gender="Homme">Homme</button>
+                            <button class="filter-chip" data-gender="Femme">Femme</button>
+                            <button class="filter-chip" data-gender="Autre">Autre</button>
+                        </div>
+                    </div>
+
+                    <!-- Categories -->
+                    <div style="margin-top:1rem">
+                        <div class="search-filter-title">Catégories</div>
+                        <div class="cat-checks">
+                            <div class="cat-check" data-cat="geniteur">
+                                <input type="checkbox" id="sc-geniteur" value="Géniteur">
+                                <label for="sc-geniteur">🧬 Géniteur</label>
+                            </div>
+                            <div class="cat-check" data-cat="coparentalite">
+                                <input type="checkbox" id="sc-coparen" value="Coparentalité">
+                                <label for="sc-coparen">🤝 Coparentalité</label>
+                            </div>
+                            <div class="cat-check" data-cat="homoparentalite">
+                                <input type="checkbox" id="sc-homo" value="Homoparentalité">
+                                <label for="sc-homo">🌈 Homoparentalité</label>
+                            </div>
+                            <div class="cat-check" data-cat="fonder">
+                                <input type="checkbox" id="sc-fonder" value="Fonder une Famille">
+                                <label for="sc-fonder">👶 Fonder une Famille</label>
+                            </div>
+                            <div class="cat-check" data-cat="recomposee">
+                                <input type="checkbox" id="sc-recomposee" value="Famille Recomposée">
+                                <label for="sc-recomposee">🏡 Famille Recomposée</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location -->
+                    <div style="margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+                        <div>
+                            <div class="search-filter-title">Pays</div>
+                            <select id="searchCountry" class="form-input" style="appearance:auto">
+                                <option value="">Tous les pays</option>
+                                <option value="France">France</option>
+                                <option value="Belgique">Belgique</option>
+                                <option value="Suisse">Suisse</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Maroc">Maroc</option>
+                                <option value="Tunisie">Tunisie</option>
+                                <option value="Algérie">Algérie</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="search-filter-title">Région</div>
+                            <input type="text" id="searchRegion" class="form-input" placeholder="Ex: Île-de-France">
+                        </div>
+                    </div>
+
+                    <!-- Search button -->
+                    <button class="btn btn-primary btn-block" id="searchBtn" style="margin-top:1.1rem">
+                        Rechercher
+                    </button>
+                </div>
+
+                <!-- Results -->
+                <div id="searchResultsHeader" class="search-results-header hidden"></div>
+
+                <!-- Loading -->
+                <div id="searchLoading" class="feed-loading hidden">
+                    <div class="spinner"></div>
+                </div>
+
+                <!-- Results list -->
+                <div id="searchResults"></div>
+
+                <!-- Empty state -->
+                <div id="searchEmpty" class="feed-empty hidden">
+                    <div style="font-size:3rem;margin-bottom:0.75rem">🔍</div>
+                    <h3>Aucun résultat</h3>
+                    <p>Essayez d'élargir vos critères de recherche.</p>
+                </div>
+
+                <!-- Load more -->
+                <div id="searchLoadMoreWrap" class="hidden">
+                    <button class="load-more-btn" id="searchLoadMoreBtn">Voir plus de résultats</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <a href="/" class="bottom-nav-item">
+            <span class="bottom-nav-icon">🏠</span>
+            <span>Accueil</span>
+        </a>
+        <a href="/decouvrir" class="bottom-nav-item">
+            <span class="bottom-nav-icon">✨</span>
+            <span>Découvrir</span>
+        </a>
+        <a href="/recherche" class="bottom-nav-item active">
+            <span class="bottom-nav-icon">🔍</span>
+            <span>Recherche</span>
+        </a>
+        <a href="/messages" class="bottom-nav-item" id="navMessages">
+            <span class="bottom-nav-icon">💬</span>
+            <span>Messages</span>
+        </a>
+        <a href="/profil" class="bottom-nav-item">
+            <span class="bottom-nav-icon">👤</span>
+            <span>Profil</span>
+        </a>
+    </nav>
+
+    <script src="/js/app.js"></script>
+    <script>
+    let selectedGender = 'all';
+    let searchOffset = 0;
+    const SEARCH_PAGE = 20;
+    let searchHasMore = false;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const { loggedIn } = await checkAuth();
+        updateNav();
+
+        if (!loggedIn) {
+            document.getElementById('authRequired').style.display = 'flex';
+            return;
+        }
+
+        document.getElementById('searchContent').classList.remove('hidden');
+
+        // Gender filter chips
+        document.querySelectorAll('[data-gender]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-gender]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedGender = btn.dataset.gender;
+            });
+        });
+
+        // Search button
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            searchOffset = 0;
+            document.getElementById('searchResults').innerHTML = '';
+            document.getElementById('searchEmpty').classList.add('hidden');
+            document.getElementById('searchLoadMoreWrap').classList.add('hidden');
+            runSearch(true);
+        });
+
+        // Enter key on search field
+        document.getElementById('searchQ').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('searchBtn').click();
+            }
+        });
+
+        // Load more
+        document.getElementById('searchLoadMoreBtn').addEventListener('click', () => {
+            runSearch(false);
+        });
+
+        // Initial load (show everyone)
+        runSearch(true);
+    });
+
+    async function runSearch(reset) {
+        document.getElementById('searchLoading').classList.remove('hidden');
+
+        const params = {
+            limit: SEARCH_PAGE,
+            offset: searchOffset
+        };
+
+        const q = document.getElementById('searchQ').value.trim();
+        if (q) params.q = q;
+
+        const ageMin = document.getElementById('ageMin').value;
+        const ageMax = document.getElementById('ageMax').value;
+        if (ageMin) params.age_min = ageMin;
+        if (ageMax) params.age_max = ageMax;
+
+        if (selectedGender !== 'all') params.gender = selectedGender;
+
+        const selectedCats = [];
+        document.querySelectorAll('.cat-checks input:checked').forEach(cb => {
+            selectedCats.push(cb.value);
+        });
+        if (selectedCats.length > 0) {
+            // URLSearchParams supports multiple values for same key
+            // We'll pass first category for now (API filters by "any of")
+            params.categories = selectedCats[0];
+        }
+
+        const country = document.getElementById('searchCountry').value;
+        if (country) params.country = country;
+
+        const region = document.getElementById('searchRegion').value.trim();
+        if (region) params.region = region;
+
+        try {
+            const data = await API.search(params);
+            const container = document.getElementById('searchResults');
+
+            if (reset) container.innerHTML = '';
+
+            if (reset && data.users.length === 0) {
+                document.getElementById('searchEmpty').classList.remove('hidden');
+                document.getElementById('searchResultsHeader').classList.add('hidden');
+                document.getElementById('searchLoadMoreWrap').classList.add('hidden');
+            } else {
+                document.getElementById('searchEmpty').classList.add('hidden');
+
+                if (reset) {
+                    const header = document.getElementById('searchResultsHeader');
+                    header.textContent = `${data.users.length >= SEARCH_PAGE ? SEARCH_PAGE + '+' : data.users.length} profil(s) trouvé(s)`;
+                    header.classList.remove('hidden');
+                }
+
+                data.users.forEach(user => {
+                    container.appendChild(renderFeedCard(user));
+                });
+
+                searchHasMore = data.users.length >= SEARCH_PAGE;
+                if (searchHasMore) {
+                    document.getElementById('searchLoadMoreWrap').classList.remove('hidden');
+                    searchOffset += data.users.length;
+                } else {
+                    document.getElementById('searchLoadMoreWrap').classList.add('hidden');
+                }
+            }
+        } catch (err) {
+            console.error('Search error:', err.message);
+        }
+
+        document.getElementById('searchLoading').classList.add('hidden');
+    }
+    </script>
+</body>
+</html>

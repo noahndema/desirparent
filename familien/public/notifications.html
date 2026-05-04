@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications — DésirParent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+    <style>
+        .notif-row {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid #f5f5f5;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.15s;
+            position: relative;
+        }
+
+        .notif-row:hover {
+            background: #fef2f7;
+        }
+
+        .notif-row.unread {
+            background: #fff5f8;
+        }
+
+        .notif-row.unread::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--prune, #E8185A);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .notif-avatar-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .notif-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .notif-type-icon {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+
+        .notif-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notif-text {
+            font-size: 0.875rem;
+            color: #1a1a1a;
+            line-height: 1.4;
+        }
+
+        .notif-text strong {
+            font-weight: 700;
+        }
+
+        .notif-preview {
+            font-size: 0.78rem;
+            color: #888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 0.15rem;
+        }
+
+        .notif-time {
+            font-size: 0.72rem;
+            color: #aaa;
+            flex-shrink: 0;
+        }
+
+        /* Tabs */
+        .notif-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Mark all read button */
+        .mark-read-btn {
+            background: none;
+            border: none;
+            color: var(--prune, #E8185A);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+
+        .mark-read-btn:hover {
+            background: #fef2f7;
+        }
+
+        .notif-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem 0.5rem;
+        }
+
+        .notif-page-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #1a1a1a;
+        }
+
+        .notif-container {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+
+    <!-- TOP NAV -->
+    <nav class="nav">
+        <a href="/" class="nav-logo">
+            <img src="/images/logo-transparent.png" alt="DésirParent">
+            <span class="nav-logo-text">DésirParent</span>
+        </a>
+        <div class="nav-links">
+            <a href="/connexion" class="nav-link nav-logged-out">Connexion</a>
+            <a href="/inscription" class="nav-link cta nav-logged-out">Créer mon profil</a>
+            <a href="/notifications" class="nav-link nav-bell nav-logged-in" id="headerBell" style="display:none">🔔</a>
+            <a href="#" class="nav-link logout nav-logged-in logout-btn" style="display:none">Déconnexion</a>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="feed-page">
+        <!-- Auth required -->
+        <div id="authRequired" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:2rem;gap:1.5rem">
+            <div style="font-size:3rem">🔒</div>
+            <h2 style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--prune)">Connectez-vous</h2>
+            <p style="color:var(--gray-500,#6b7280);max-width:360px">Connectez-vous pour voir vos notifications.</p>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:center">
+                <a href="/connexion" class="btn btn-primary">Se connecter</a>
+            </div>
+        </div>
+
+        <!-- Notifications content -->
+        <div id="notifContent" class="hidden">
+            <div class="notif-container">
+                <div class="notif-header-row">
+                    <div class="notif-page-title">🔔 Notifications</div>
+                    <button class="mark-read-btn" id="markAllReadBtn">Tout marquer lu</button>
+                </div>
+
+                <!-- Tabs -->
+                <div class="notif-tabs">
+                    <button class="filter-chip active" data-tab="all">Tout</button>
+                    <button class="filter-chip" data-tab="like">❤️ Likes</button>
+                    <button class="filter-chip" data-tab="message">💬 Messages</button>
+                </div>
+
+                <!-- Loading -->
+                <div id="notifLoading" class="feed-loading">
+                    <div class="spinner"></div>
+                </div>
+
+                <!-- List -->
+                <div id="notifList"></div>
+
+                <!-- Empty state -->
+                <div id="notifEmpty" class="feed-empty hidden">
+                    <div style="font-size:3rem;margin-bottom:0.75rem">🔔</div>
+                    <h3>Pas encore de notifications</h3>
+                    <p>Complétez votre profil pour attirer plus de personnes !</p>
+                    <div style="margin-top:1.5rem">
+                        <a href="/profil" class="btn btn-primary">Compléter mon profil</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <a href="/" class="bottom-nav-item">
+            <span class="bottom-nav-icon">🏠</span>
+            <span>Accueil</span>
+        </a>
+        <a href="/decouvrir" class="bottom-nav-item">
+            <span class="bottom-nav-icon">✨</span>
+            <span>Découvrir</span>
+        </a>
+        <a href="/recherche" class="bottom-nav-item">
+            <span class="bottom-nav-icon">🔍</span>
+            <span>Recherche</span>
+        </a>
+        <a href="/messages" class="bottom-nav-item" id="navMessages">
+            <span class="bottom-nav-icon">💬</span>
+            <span>Messages</span>
+        </a>
+        <a href="/profil" class="bottom-nav-item">
+            <span class="bottom-nav-icon">👤</span>
+            <span>Profil</span>
+        </a>
+    </nav>
+
+    <script src="/js/app.js"></script>
+    <script>
+    const DEFAULT_PHOTO_N = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect fill='%23E5E7EB' width='200' height='200'/%3E%3Ccircle cx='100' cy='80' r='35' fill='%239CA3AF'/%3E%3Cellipse cx='100' cy='170' rx='55' ry='45' fill='%239CA3AF'/%3E%3C/svg%3E";
+    let allNotifications = [];
+    let activeTab = 'all';
+
+    function timeAgo(dateStr) {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000);
+        if (diff < 60) return 'à l\'instant';
+        if (diff < 3600) return `il y a ${Math.floor(diff/60)} min`;
+        if (diff < 86400) return `il y a ${Math.floor(diff/3600)}h`;
+        if (diff < 604800) return `il y a ${Math.floor(diff/86400)}j`;
+        return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const { loggedIn } = await checkAuth();
+        updateNav();
+
+        if (!loggedIn) {
+            document.getElementById('authRequired').style.display = 'flex';
+            document.getElementById('notifLoading').classList.add('hidden');
+            return;
+        }
+
+        document.getElementById('notifContent').classList.remove('hidden');
+
+        // Tab listeners
+        document.querySelectorAll('.notif-tabs .filter-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.notif-tabs .filter-chip').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeTab = btn.dataset.tab;
+                renderNotifications();
+            });
+        });
+
+        // Mark all read
+        document.getElementById('markAllReadBtn').addEventListener('click', async () => {
+            try {
+                await API.fetch('/api/notifications/read', { method: 'PUT' });
+                allNotifications.forEach(n => n.is_read = true);
+                renderNotifications();
+            } catch {}
+        });
+
+        await loadNotifications();
+    });
+
+    async function loadNotifications() {
+        try {
+            const data = await API.fetch('/api/notifications');
+            document.getElementById('notifLoading').classList.add('hidden');
+            allNotifications = data.notifications || [];
+            renderNotifications();
+        } catch (err) {
+            console.error('Notif error:', err.message);
+            document.getElementById('notifLoading').classList.add('hidden');
+            document.getElementById('notifEmpty').classList.remove('hidden');
+        }
+    }
+
+    function getNotifConfig(type) {
+        switch (type) {
+            case 'like': return { icon: '❤️', color: '#E8185A', label: 'a liké votre profil' };
+            case 'message': return { icon: '💬', color: '#3B82F6', label: 'vous a envoyé un message' };
+            case 'profile_validated': return { icon: '✅', color: '#10B981', label: 'Votre profil a été validé' };
+            default: return { icon: '🔔', color: '#6B7280', label: 'notification' };
+        }
+    }
+
+    function getNotifHref(notif) {
+        switch (notif.type) {
+            case 'like': return `/profil/${notif.from_id}`;
+            case 'message': return `/messages?with=${notif.from_id}`;
+            default: return '#';
+        }
+    }
+
+    function renderNotifications() {
+        const list = document.getElementById('notifList');
+        const empty = document.getElementById('notifEmpty');
+        list.innerHTML = '';
+
+        const filtered = activeTab === 'all'
+            ? allNotifications
+            : allNotifications.filter(n => n.type === activeTab);
+
+        if (filtered.length === 0) {
+            empty.classList.remove('hidden');
+            return;
+        }
+
+        empty.classList.add('hidden');
+
+        filtered.forEach(notif => {
+            const cfg = getNotifConfig(notif.type);
+            const href = getNotifHref(notif);
+            const meta = [];
+            if (notif.from_age) meta.push(`${notif.from_age} ans`);
+            if (notif.from_city) meta.push(notif.from_city);
+
+            const row = document.createElement('a');
+            row.href = href;
+            row.className = `notif-row${notif.is_read ? '' : ' unread'}`;
+
+            let bodyText = '';
+            if (notif.from_name) {
+                bodyText = `<strong>${notif.from_name}</strong> ${cfg.label}`;
+            } else {
+                bodyText = cfg.label;
+            }
+
+            let previewHtml = '';
+            if (notif.type === 'message' && notif.metadata?.preview) {
+                previewHtml = `<div class="notif-preview">${escapeHtml(notif.metadata.preview)}</div>`;
+            } else if (notif.from_city || notif.from_age) {
+                previewHtml = `<div class="notif-preview">${meta.join(' · ')}</div>`;
+            }
+
+            row.innerHTML = `
+                <div class="notif-avatar-wrap">
+                    <img class="notif-avatar" src="${notif.from_photo || DEFAULT_PHOTO_N}" alt=""
+                         onerror="this.src='${DEFAULT_PHOTO_N}'">
+                    <div class="notif-type-icon">${cfg.icon}</div>
+                </div>
+                <div class="notif-body">
+                    <div class="notif-text">${bodyText}</div>
+                    ${previewHtml}
+                </div>
+                <div class="notif-time">${timeAgo(notif.created_at)}</div>
+            `;
+
+            list.appendChild(row);
+        });
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Découvrir — DésirParent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="has-bottom-nav">
+
+    <!-- TOP NAV -->
+    <nav class="nav">
+        <a href="/" class="nav-logo">
+            <img src="/images/logo-transparent.png" alt="DésirParent">
+            <span class="nav-logo-text">DésirParent</span>
+        </a>
+        <div class="nav-links">
+            <a href="/connexion" class="nav-link nav-logged-out">Connexion</a>
+            <a href="/inscription" class="nav-link cta nav-logged-out">Créer mon profil</a>
+            <a href="/notifications" class="nav-link nav-bell nav-logged-in" id="headerBell" style="display:none">🔔</a>
+            <a href="#" class="nav-link logout nav-logged-in logout-btn" style="display:none">Déconnexion</a>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="feed-page">
+        <!-- Auth required -->
+        <div id="authRequired" class="hidden" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:2rem;gap:1.5rem">
+            <div style="font-size:3rem">🔒</div>
+            <h2 style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--prune)">Connectez-vous pour découvrir</h2>
+            <p style="color:var(--gray-500);max-width:360px">Créez un compte ou connectez-vous pour voir les profils et trouver votre partenaire idéal.</p>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:center">
+                <a href="/connexion" class="btn btn-primary">Se connecter</a>
+                <a href="/inscription" class="btn btn-secondary">Créer un compte</a>
+            </div>
+        </div>
+
+        <!-- Feed -->
+        <div id="feedContent" class="hidden">
+            <div class="feed-container">
+                <div class="feed-title">✨ Découvrir</div>
+
+                <!-- Filter chips -->
+                <div class="feed-filters" id="feedFilters">
+                    <button class="filter-chip active" data-cat="all">Tous</button>
+                    <button class="filter-chip" data-cat="Géniteur">🧬 Géniteur</button>
+                    <button class="filter-chip" data-cat="Coparentalité">🤝 Coparentalité</button>
+                    <button class="filter-chip" data-cat="Homoparentalité">🌈 Homoparentalité</button>
+                    <button class="filter-chip" data-cat="Fonder une Famille">👶 Fonder une Famille</button>
+                    <button class="filter-chip" data-cat="Famille Recomposée">🏡 Famille Recomposée</button>
+                </div>
+
+                <!-- Loading -->
+                <div id="feedLoading" class="feed-loading">
+                    <div class="spinner"></div>
+                </div>
+
+                <!-- Cards container -->
+                <div id="feedCards"></div>
+
+                <!-- Empty state -->
+                <div id="feedEmpty" class="feed-empty hidden">
+                    <div style="font-size:3rem;margin-bottom:0.75rem">🌱</div>
+                    <h3>Aucun profil trouvé</h3>
+                    <p>Essayez un autre filtre ou revenez plus tard.</p>
+                </div>
+
+                <!-- Load more -->
+                <div id="loadMoreWrap" class="hidden">
+                    <button class="load-more-btn" id="loadMoreBtn">Voir plus de profils</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <a href="/" class="bottom-nav-item">
+            <span class="bottom-nav-icon">🏠</span>
+            <span>Accueil</span>
+        </a>
+        <a href="/decouvrir" class="bottom-nav-item active">
+            <span class="bottom-nav-icon">✨</span>
+            <span>Découvrir</span>
+        </a>
+        <a href="/recherche" class="bottom-nav-item">
+            <span class="bottom-nav-icon">🔍</span>
+            <span>Recherche</span>
+        </a>
+        <a href="/messages" class="bottom-nav-item" id="navMessages">
+            <span class="bottom-nav-icon">💬</span>
+            <span>Messages</span>
+        </a>
+        <a href="/profil" class="bottom-nav-item">
+            <span class="bottom-nav-icon">👤</span>
+            <span>Profil</span>
+        </a>
+    </nav>
+
+    <script src="/js/app.js"></script>
+    <script>
+    let currentCategory = 'all';
+    let currentOffset = 0;
+    const PAGE_SIZE = 20;
+    let hasMore = false;
+    let isLoading = false;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const { loggedIn } = await checkAuth();
+        updateNav();
+
+        if (!loggedIn) {
+            document.getElementById('authRequired').style.display = 'flex';
+            document.getElementById('feedLoading').classList.add('hidden');
+            return;
+        }
+
+        document.getElementById('feedContent').classList.remove('hidden');
+        // Badges painted by app.js global init via checkAuth cache — no extra fetch needed
+        initFilters();
+        loadFeed(true);
+    });
+
+    function initFilters() {
+        document.querySelectorAll('#feedFilters .filter-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#feedFilters .filter-chip').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.dataset.cat;
+                currentOffset = 0;
+                document.getElementById('feedCards').innerHTML = '';
+                document.getElementById('feedEmpty').classList.add('hidden');
+                document.getElementById('loadMoreWrap').classList.add('hidden');
+                loadFeed(true);
+            });
+        });
+    }
+
+    async function loadFeed(reset = false) {
+        if (isLoading) return;
+        isLoading = true;
+
+        if (reset) {
+            document.getElementById('feedLoading').classList.remove('hidden');
+        }
+
+        try {
+            const params = { limit: PAGE_SIZE, offset: currentOffset };
+            if (currentCategory !== 'all') params.category = currentCategory;
+
+            const data = await API.getFeed(params);
+            const cards = document.getElementById('feedCards');
+
+            if (reset && data.users.length === 0) {
+                document.getElementById('feedEmpty').classList.remove('hidden');
+                document.getElementById('loadMoreWrap').classList.add('hidden');
+            } else {
+                document.getElementById('feedEmpty').classList.add('hidden');
+                data.users.forEach(user => {
+                    cards.appendChild(renderFeedCard(user));
+                });
+
+                hasMore = data.users.length >= PAGE_SIZE;
+                if (hasMore) {
+                    document.getElementById('loadMoreWrap').classList.remove('hidden');
+                    currentOffset += data.users.length;
+                } else {
+                    document.getElementById('loadMoreWrap').classList.add('hidden');
+                }
+            }
+        } catch (err) {
+            console.error('Feed error:', err.message);
+        }
+
+        document.getElementById('feedLoading').classList.add('hidden');
+        isLoading = false;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('loadMoreBtn')?.addEventListener('click', () => {
+            loadFeed(false);
+        });
+    });
+    </script>
+</body>
+</html>
