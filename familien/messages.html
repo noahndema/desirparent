@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages — DésirParent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+    <style>
+        /* ── Messages Layout ── */
+        .msg-layout {
+            display: flex;
+            position: relative; /* establishes stacking context for absolute children */
+            /* 100vh works correctly on iOS Safari: it shrinks to the visual viewport
+               when the virtual keyboard opens, keeping input visible above the keyboard. */
+            height: calc(100vh - 56px - 60px);
+            min-height: 0; /* critical: allows flex children to shrink properly on mobile Safari */
+            overflow: hidden;
+            background: #fff;
+        }
+
+        /* Conversation list panel */
+        .conv-panel {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 5; /* explicit: below .chat-panel */
+            border-right: 1px solid #eee;
+            background: #fff;
+            transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+        }
+
+        /* Chat panel */
+        .chat-panel {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            transform: translateX(100%);
+            background: #fff;
+            transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+            z-index: 1001; /* above .nav (1000) and .bottom-nav (1000) */
+        }
+
+        .chat-open .conv-panel {
+            transform: translateX(-100%);
+        }
+
+        .chat-open .chat-panel {
+            transform: translateX(0);
+        }
+
+        /* Desktop: side by side */
+        @media (min-width: 700px) {
+            .msg-layout { position: relative; }
+            .conv-panel {
+                width: 320px;
+                flex-shrink: 0;
+                transform: none !important;
+            }
+            .chat-panel {
+                position: static;
+                width: calc(100% - 320px);
+                transform: none !important;
+            }
+        }
+
+        /* Panel headers */
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #f0f0f0;
+            font-weight: 700;
+            font-size: 1rem;
+            background: #fff;
+            flex-shrink: 0;
+        }
+
+        .panel-header-back {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            color: var(--prune);
+            display: none;
+        }
+
+        @media (max-width: 699px) {
+            .panel-header-back { display: block; }
+        }
+
+        /* Conversation rows */
+        .conv-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .conv-row {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.875rem 1.25rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f5f5f5;
+            transition: background 0.15s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .conv-row:hover, .conv-row.active {
+            background: #fef2f7;
+        }
+
+        .conv-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .conv-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .conv-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .conv-preview {
+            font-size: 0.8rem;
+            color: #777;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 0.15rem;
+        }
+
+        .conv-preview.unread {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .conv-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.35rem;
+            flex-shrink: 0;
+        }
+
+        .conv-time {
+            font-size: 0.72rem;
+            color: #aaa;
+        }
+
+        .unread-badge {
+            background: var(--prune, #E8185A);
+            color: #fff;
+            border-radius: 50px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Empty state */
+        .conv-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            text-align: center;
+            gap: 0.75rem;
+            min-height: 0; /* critical: allows shrink in flex column — was height:100% which broke layout on Safari */
+        }
+
+        .conv-empty-icon {
+            font-size: 3rem;
+        }
+
+        .conv-empty h3 {
+            font-weight: 700;
+            color: #222;
+        }
+
+        .conv-empty p {
+            color: #888;
+            font-size: 0.875rem;
+        }
+
+        /* Chat area */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            background: #f9f9fb;
+            min-height: 0; /* critical: allows flex shrink on mobile Safari */
+        }
+
+        .chat-message {
+            display: flex;
+            flex-direction: column;
+            max-width: 72%;
+        }
+
+        .chat-message.me {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .chat-message.them {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .chat-bubble {
+            padding: 0.6rem 0.9rem;
+            border-radius: 18px;
+            font-size: 0.875rem;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        .chat-message.me .chat-bubble {
+            background: var(--prune, #E8185A);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.them .chat-bubble {
+            background: #fff;
+            color: #1a1a1a;
+            border: 1px solid #eee;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-time {
+            font-size: 0.68rem;
+            color: #aaa;
+            margin-top: 0.2rem;
+            padding: 0 0.25rem;
+        }
+
+        /* Chat input */
+        .chat-input-bar {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-top: 1px solid #eee;
+            background: #fff;
+            flex-shrink: 0;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 22px;
+            padding: 0.6rem 1rem;
+            font-family: inherit;
+            font-size: 0.875rem;
+            resize: none;
+            max-height: 100px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--prune, #E8185A);
+        }
+
+        .chat-send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--prune, #E8185A);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: opacity 0.2s;
+        }
+
+        .chat-send-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Chat header */
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            flex-shrink: 0;
+            background: #fff;
+        }
+
+        .chat-header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .chat-header-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .chat-header-sub {
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+
+        /* No conversation selected (desktop) */
+        .chat-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 1rem;
+            color: #bbb;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* Quota bar */
+        .quota-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #fff7ed;
+            border-top: 1px solid #fed7aa;
+            font-size: 0.78rem;
+            color: #92400e;
+        }
+
+        .quota-bar.hidden { display: none; }
+
+        /* Upgrade modal */
+        .upgrade-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .upgrade-modal-overlay.hidden { display: none; }
+
+        .upgrade-modal {
+            background: #fff;
+            border-radius: 24px 24px 0 0;
+            padding: 2rem 1.5rem 2.5rem;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        .upgrade-modal h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--prune, #E8185A);
+        }
+
+        .upgrade-modal p {
+            color: #555;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .plan-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .plan-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 1rem 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .plan-card.featured {
+            border-color: var(--prune, #E8185A);
+            box-shadow: 0 0 0 3px rgba(232,24,90,0.1);
+        }
+
+        .plan-card-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .plan-card-price {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--prune, #E8185A);
+        }
+
+        .plan-card-price span {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: #888;
+        }
+
+        .plan-card-feature {
+            font-size: 0.72rem;
+            color: #666;
+            margin-top: 0.4rem;
+        }
+
+        .upgrade-modal-close {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 0.875rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* Loading spinner in chat */
+        .chat-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Auth required */
+        .auth-required {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+            padding: 2rem;
+            gap: 1.5rem;
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+
+    <!-- TOP NAV -->
+    <nav class="nav">
+        <a href="/" class="nav-logo">
+            <img src="/images/logo-transparent.png" alt="DésirParent">
+            <span class="nav-logo-text">DésirParent</span>
+        </a>
+        <div class="nav-links">
+            <a href="/connexion" class="nav-link nav-logged-out">Connexion</a>
+            <a href="/inscription" class="nav-link cta nav-logged-out">Créer mon profil</a>
+            <a href="/notifications" class="nav-link nav-bell nav-logged-in" id="headerBell" style="display:none">🔔</a>
+            <a href="#" class="nav-link logout nav-logged-in logout-btn" style="display:none">Déconnexion</a>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main style="padding:0;overflow:hidden">
+
+        <!-- Auth required -->
+        <div id="authRequired" style="display:none" class="auth-required">
+            <div style="font-size:3rem">🔒</div>
+            <h2 style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--prune)">Connexion requise</h2>
+            <p style="color:var(--gray-500,#6b7280);max-width:360px">Connectez-vous pour accéder à vos messages.</p>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:center">
+                <a href="/connexion" class="btn btn-primary">Se connecter</a>
+                <a href="/inscription" class="btn btn-outline">S'inscrire</a>
+            </div>
+        </div>
+
+        <!-- Messages layout -->
+        <div id="msgLayout" class="msg-layout hidden">
+
+            <!-- Left: conversation list -->
+            <div class="conv-panel" id="convPanel">
+                <div class="panel-header">
+                    <span>💬 Messages</span>
+                </div>
+                <div class="conv-list" id="convList">
+                    <div class="chat-loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+
+            <!-- Right: chat view -->
+            <div class="chat-panel" id="chatPanel">
+                <!-- Empty state (desktop) -->
+                <div id="chatEmpty" class="chat-empty-state">
+                    <div style="font-size:3.5rem">💬</div>
+                    <div style="font-size:0.9rem;color:#bbb">Sélectionnez une conversation</div>
+                </div>
+
+                <!-- Active chat (hidden until conversation selected) -->
+                <div id="chatActive" style="display:none;flex-direction:column;min-height:0;flex:1">
+                    <div class="chat-header">
+                        <button class="panel-header-back" id="backBtn">←</button>
+                        <img id="chatAvatar" class="chat-header-avatar" src="" alt="">
+                        <div>
+                            <div class="chat-header-name" id="chatName"></div>
+                            <div class="chat-header-sub" id="chatSub"></div>
+                        </div>
+                        <a id="chatProfileLink" href="#" style="margin-left:auto;font-size:1.1rem;text-decoration:none">👤</a>
+                    </div>
+
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="chat-loading"><div class="spinner"></div></div>
+                    </div>
+
+                    <!-- Quota bar -->
+                    <div class="quota-bar hidden" id="quotaBar">
+                        <span>⚡</span>
+                        <span id="quotaText">5 messages restants aujourd'hui</span>
+                        <button onclick="openUpgradeModal()" style="margin-left:auto;font-size:0.72rem;font-weight:700;color:#E8185A;background:none;border:none;cursor:pointer">Passer Premium →</button>
+                    </div>
+
+                    <div class="chat-input-bar">
+                        <textarea
+                            class="chat-input"
+                            id="chatInput"
+                            placeholder="Écrire un message..."
+                            rows="1"
+                            maxlength="1000"
+                        ></textarea>
+                        <button class="chat-send-btn" id="sendBtn" disabled>↑</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Upgrade modal -->
+    <div class="upgrade-modal-overlay hidden" id="upgradeModal">
+        <div class="upgrade-modal">
+            <h2>✨ Débloquez la messagerie</h2>
+            <p>Passez à un abonnement Standard ou Premium pour des échanges illimités avec les membres de DésirParent.</p>
+            <div class="plan-cards">
+                <div class="plan-card">
+                    <div class="plan-card-name">Standard</div>
+                    <div class="plan-card-price">9.99<span>/mois</span></div>
+                    <div class="plan-card-feature">Messages illimités<br>avec les abonnés</div>
+                </div>
+                <div class="plan-card featured">
+                    <div class="plan-card-name">⭐ Premium</div>
+                    <div class="plan-card-price">19.99<span>/mois</span></div>
+                    <div class="plan-card-feature">Tous les profils +<br>Badge + Vedette</div>
+                </div>
+            </div>
+            <a href="/compte" class="btn btn-primary" style="width:100%;margin-bottom:0.75rem;text-align:center;display:block">Voir les abonnements →</a>
+            <button class="upgrade-modal-close" onclick="closeUpgradeModal()">Continuer gratuitement</button>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <a href="/" class="bottom-nav-item">
+            <span class="bottom-nav-icon">🏠</span>
+            <span>Accueil</span>
+        </a>
+        <a href="/decouvrir" class="bottom-nav-item">
+            <span class="bottom-nav-icon">✨</span>
+            <span>Découvrir</span>
+        </a>
+        <a href="/recherche" class="bottom-nav-item">
+            <span class="bottom-nav-icon">🔍</span>
+            <span>Recherche</span>
+        </a>
+        <a href="/messages" class="bottom-nav-item active" id="navMessages">
+            <span class="bottom-nav-icon">💬</span>
+            <span>Messages</span>
+        </a>
+        <a href="/profil" class="bottom-nav-item">
+            <span class="bottom-nav-icon">👤</span>
+            <span>Profil</span>
+        </a>
+    </nav>
+
+    <script src="/js/app.js"></script>
+    <script>
+    // ── State ────────────────────────────────────────────────
+    let activeUserId = null;
+    let pollInterval = null;
+    let quota = null;
+    let lastMessageId = null;
+    const DEFAULT_PHOTO_MSG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect fill='%23E5E7EB' width='200' height='200'/%3E%3Ccircle cx='100' cy='80' r='35' fill='%239CA3AF'/%3E%3Cellipse cx='100' cy='170' rx='55' ry='45' fill='%239CA3AF'/%3E%3C/svg%3E";
+
+    function timeAgo(dateStr) {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000);
+        if (diff < 60) return 'à l\'instant';
+        if (diff < 3600) return `${Math.floor(diff/60)}min`;
+        if (diff < 86400) return `${Math.floor(diff/3600)}h`;
+        if (diff < 604800) return `${Math.floor(diff/86400)}j`;
+        return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    }
+
+    function formatTime(dateStr) {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const isToday = date.toDateString() === now.toDateString();
+        if (isToday) return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    }
+
+    // ── Init ─────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async () => {
+        const { loggedIn } = await checkAuth();
+        updateNav();
+
+        if (!loggedIn) {
+            document.getElementById('authRequired').style.display = 'flex';
+            return;
+        }
+
+        document.getElementById('msgLayout').classList.remove('hidden');
+
+        // Set up input event listeners (must be inside DOMContentLoaded since
+        // #chatInput and #sendBtn live in the DOM but may not be visible yet)
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        chatInput.addEventListener('input', () => {
+            sendBtn.disabled = !chatInput.value.trim();
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
+        });
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!sendBtn.disabled) sendMessage();
+            }
+        });
+        sendBtn.addEventListener('click', sendMessage);
+
+        // loadConversations and loadQuota are independent — run in parallel
+        const [,] = await Promise.all([loadConversations(), loadQuota()]);
+
+        // Check if ?with= or ?sender= param to open conversation directly
+        const params = new URLSearchParams(window.location.search);
+        const withId = params.get('with') || params.get('sender');
+        if (withId) {
+            openConversation(parseInt(withId));
+        }
+
+        // Badges already painted by app.js DOMContentLoaded via checkAuth cache
+    });
+
+    // ── Conversations ────────────────────────────────────────
+    async function loadConversations() {
+        try {
+            const data = await API.fetch('/api/conversations');
+            const list = document.getElementById('convList');
+            list.innerHTML = '';
+
+            if (!data.conversations || data.conversations.length === 0) {
+                list.innerHTML = `
+                    <div class="conv-empty">
+                        <div class="conv-empty-icon">💬</div>
+                        <h3>Aucune conversation</h3>
+                        <p>Envoyez un message à quelqu'un depuis le fil de découverte.</p>
+                        <div style="margin-top:1rem">
+                            <a href="/decouvrir" class="btn btn-primary" style="font-size:0.875rem">Découvrir des profils</a>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            data.conversations.forEach(conv => {
+                const row = document.createElement('div');
+                row.className = 'conv-row';
+                row.dataset.userId = conv.other_id;
+                if (activeUserId === parseInt(conv.other_id)) row.classList.add('active');
+
+                const unread = parseInt(conv.unread_count) || 0;
+                const isUnread = unread > 0 && conv.last_sender_id !== currentUser?.id;
+                const isMe = parseInt(conv.last_sender_id) === currentUser?.id;
+                const previewText = isMe ? `Vous: ${conv.last_content}` : conv.last_content;
+
+                row.innerHTML = `
+                    <img class="conv-avatar" src="${conv.photo_url || DEFAULT_PHOTO_MSG}" alt="${conv.name}"
+                         onerror="this.src='${DEFAULT_PHOTO_MSG}'">
+                    <div class="conv-body">
+                        <div class="conv-name">${conv.name || 'Anonyme'}</div>
+                        <div class="conv-preview ${isUnread ? 'unread' : ''}">${escapeHtml(previewText || '')}</div>
+                    </div>
+                    <div class="conv-meta">
+                        <span class="conv-time">${timeAgo(conv.last_at)}</span>
+                        ${isUnread ? `<span class="unread-badge">${unread}</span>` : ''}
+                    </div>
+                `;
+
+                row.addEventListener('click', () => openConversation(parseInt(conv.other_id), conv));
+                list.appendChild(row);
+            });
+        } catch (err) {
+            console.error('[conv] Load error:', err.message);
+        }
+    }
+
+    // ── Open Conversation ────────────────────────────────────
+    async function openConversation(userId, convData) {
+        activeUserId = userId;
+        lastMessageId = null;
+
+        // Mobile: slide to chat
+        document.getElementById('msgLayout').classList.add('chat-open');
+
+        // Show chat active
+        document.getElementById('chatEmpty').style.display = 'none';
+        const chatActive = document.getElementById('chatActive');
+        chatActive.style.display = 'flex';
+
+        // Profile link
+        document.getElementById('chatProfileLink').href = `/profil/${userId}`;
+
+        // Load user info if we have it from conv row
+        if (convData) {
+            document.getElementById('chatAvatar').src = convData.photo_url || DEFAULT_PHOTO_MSG;
+            document.getElementById('chatName').textContent = convData.name || 'Anonyme';
+            const meta = [];
+            if (convData.age) meta.push(`${convData.age} ans`);
+            if (convData.city) meta.push(convData.city);
+            document.getElementById('chatSub').textContent = meta.join(' · ');
+        } else {
+            // Load from API
+            try {
+                const data = await API.getProfile(userId);
+                const u = data.user;
+                document.getElementById('chatAvatar').src = u.photo_url || DEFAULT_PHOTO_MSG;
+                document.getElementById('chatName').textContent = u.name || 'Anonyme';
+                const meta = [];
+                if (u.age) meta.push(`${u.age} ans`);
+                if (u.city) meta.push(u.city);
+                document.getElementById('chatSub').textContent = meta.join(' · ');
+            } catch {}
+        }
+
+        // Mark this conversation as active in list
+        document.querySelectorAll('.conv-row').forEach(r => {
+            r.classList.toggle('active', parseInt(r.dataset.userId) === userId);
+        });
+
+        // Load messages
+        await loadMessages();
+
+        // Update quota display
+        updateQuotaBar();
+
+        // Start polling
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(pollNewMessages, 5000);
+
+        // Update URL without reload
+        const url = new URL(window.location.href);
+        url.searchParams.set('with', userId);
+        window.history.replaceState({}, '', url.toString());
+    }
+
+    async function loadMessages() {
+        const messagesEl = document.getElementById('chatMessages');
+        messagesEl.innerHTML = '<div class="chat-loading"><div class="spinner"></div></div>';
+
+        try {
+            const data = await API.fetch(`/api/messages/${activeUserId}`);
+            renderMessages(data.messages, true);
+
+            if (data.messages.length > 0) {
+                lastMessageId = data.messages[data.messages.length - 1].id;
+            }
+        } catch (err) {
+            messagesEl.innerHTML = `<div style="text-align:center;padding:2rem;color:#999">Erreur de chargement</div>`;
+        }
+    }
+
+    function renderMessages(messages, replace = false) {
+        const messagesEl = document.getElementById('chatMessages');
+        if (replace) messagesEl.innerHTML = '';
+
+        if (replace && messages.length === 0) {
+            messagesEl.innerHTML = `
+                <div class="conv-empty">
+                    <div class="conv-empty-icon">✨</div>
+                    <h3>Première prise de contact</h3>
+                    <p>Envoyez votre premier message pour démarrer la conversation !</p>
+                </div>
+            `;
+            return;
+        }
+
+        const atBottom = messagesEl.scrollTop + messagesEl.clientHeight >= messagesEl.scrollHeight - 20;
+
+        messages.forEach(msg => {
+            const isMe = msg.sender_id === currentUser?.id;
+            const div = document.createElement('div');
+            div.className = `chat-message ${isMe ? 'me' : 'them'}`;
+            div.dataset.msgId = msg.id;
+            div.innerHTML = `
+                <div class="chat-bubble">${escapeHtml(msg.content)}</div>
+                <div class="chat-time">${formatTime(msg.created_at)}</div>
+            `;
+            messagesEl.appendChild(div);
+        });
+
+        if (replace || atBottom) {
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+    }
+
+    async function pollNewMessages() {
+        if (!activeUserId) return;
+        try {
+            const url = lastMessageId
+                ? `/api/messages/${activeUserId}?limit=20`
+                : `/api/messages/${activeUserId}?limit=5`;
+            const data = await API.fetch(url);
+            if (!data.messages) return;
+
+            // Filter to only new messages
+            const newMessages = lastMessageId
+                ? data.messages.filter(m => m.id > lastMessageId)
+                : [];
+
+            if (newMessages.length > 0) {
+                renderMessages(newMessages, false);
+                lastMessageId = newMessages[newMessages.length - 1].id;
+                // Update conversation list
+                loadConversations();
+            }
+        } catch {}
+    }
+
+    // ── Send Message ─────────────────────────────────────────
+    async function sendMessage() {
+        const content = chatInput.value.trim();
+        if (!content || !activeUserId) return;
+
+        sendBtn.disabled = true;
+
+        try {
+            const data = await API.fetch(`/api/messages/${activeUserId}`, {
+                method: 'POST',
+                body: JSON.stringify({ content })
+            });
+
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+
+            // Optimistic render
+            renderMessages([data.message], false);
+            if (data.message) lastMessageId = data.message.id;
+
+            // Update quota
+            await loadQuota();
+            updateQuotaBar();
+
+            // Refresh conversation list
+            loadConversations();
+        } catch (err) {
+            if (err.message.includes('429') || err.message.includes('Limite') ||
+                err.message.includes('tier_restricted') || err.message.includes('Standard') ||
+                err.message.includes('403') || err.message.includes('abonnés')) {
+                openUpgradeModal();
+            } else {
+                alert(err.message || 'Erreur lors de l\'envoi');
+            }
+        } finally {
+            sendBtn.disabled = !chatInput.value.trim();
+        }
+    }
+
+    // ── Back button ──────────────────────────────────────────
+    document.getElementById('backBtn').addEventListener('click', () => {
+        document.getElementById('msgLayout').classList.remove('chat-open');
+        if (pollInterval) clearInterval(pollInterval);
+        activeUserId = null;
+        // Remove ?with= param
+        const url = new URL(window.location.href);
+        url.searchParams.delete('with');
+        window.history.replaceState({}, '', url.toString());
+        // Refresh conversation list
+        loadConversations();
+    });
+
+    // ── Quota ────────────────────────────────────────────────
+    async function loadQuota() {
+        try {
+            quota = await API.fetch('/api/messages/quota');
+        } catch {
+            quota = null;
+        }
+    }
+
+    function updateQuotaBar() {
+        if (!quota || quota.unlimited) {
+            document.getElementById('quotaBar').classList.add('hidden');
+            return;
+        }
+        const remaining = quota.remaining;
+        const bar = document.getElementById('quotaBar');
+
+        if (remaining <= 0) {
+            bar.classList.remove('hidden');
+            document.getElementById('quotaText').textContent = 'Limite atteinte — abonnez-vous pour des messages illimités';
+            sendBtn.disabled = true;
+            chatInput.disabled = true;
+            chatInput.placeholder = 'Limite atteinte pour aujourd\'hui';
+        } else if (remaining <= 2) {
+            bar.classList.remove('hidden');
+            document.getElementById('quotaText').textContent = `${remaining} message${remaining > 1 ? 's' : ''} restant${remaining > 1 ? 's' : ''} aujourd'hui`;
+        } else {
+            bar.classList.add('hidden');
+        }
+    }
+
+    // ── Upgrade modal ────────────────────────────────────────
+    function openUpgradeModal() {
+        document.getElementById('upgradeModal').classList.remove('hidden');
+    }
+
+    function closeUpgradeModal() {
+        document.getElementById('upgradeModal').classList.add('hidden');
+    }
+
+    document.getElementById('upgradeModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('upgradeModal')) closeUpgradeModal();
+    });
+
+    // ── Utils ────────────────────────────────────────────────
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    </script>
+</body>
+</html>

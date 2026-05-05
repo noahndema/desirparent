@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil — DésirParent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+    <style>
+        .profile-page {
+            min-height: calc(100vh - 64px);
+            padding-bottom: 3rem;
+        }
+
+        /* ── Profile View ─────────────────────────── */
+        .profile-banner {
+            background: linear-gradient(135deg, var(--lavande), #9333EA);
+            padding: 3rem 1.5rem 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-banner::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--creme);
+            border-radius: 30px 30px 0 0;
+        }
+
+        .profile-content {
+            max-width: 640px;
+            margin: -80px auto 0;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+
+        .profile-photo-wrap {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.25rem;
+        }
+
+        .profile-photo {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--white);
+            box-shadow: var(--shadow-md);
+            background: var(--gray-200);
+        }
+
+        .profile-pioneer {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+            border: 3px solid var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .profile-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--prune);
+            margin-bottom: 0.3rem;
+        }
+
+        .profile-meta {
+            color: var(--gray-500);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .profile-meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .profile-badges {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+        }
+
+        .profile-bio {
+            color: var(--gray-600);
+            line-height: 1.7;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--creme);
+            border-radius: var(--radius-sm);
+            text-align: left;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* ── Edit Mode ────────────────────────────── */
+        .edit-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            max-width: 520px;
+            margin: 2rem auto;
+        }
+
+        .edit-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--prune);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .edit-photo-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .edit-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--lavande);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .edit-photo:hover {
+            opacity: 0.8;
+        }
+
+        .edit-photo-btn {
+            font-size: 0.8rem;
+            color: var(--lavande);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .edit-photo-btn:hover { text-decoration: underline; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* ── Loading state ────────────────────────── */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 50vh;
+            gap: 1rem;
+            color: var(--gray-500);
+        }
+
+        .loading-state .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--gray-300);
+            border-top-color: var(--lavande);
+        }
+
+        /* ── Auth required ────────────────────────── */
+        .auth-required {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 50vh;
+            text-align: center;
+            padding: 2rem;
+            gap: 1.5rem;
+        }
+
+        .auth-required h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--prune);
+        }
+
+        .auth-required p {
+            color: var(--gray-500);
+            max-width: 400px;
+        }
+
+        @media (max-width: 480px) {
+            .profile-card { padding: 1.5rem; }
+            .edit-card { padding: 1.5rem; margin: 1rem; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+
+    <!-- NAV -->
+    <nav class="nav">
+        <a href="/" class="nav-logo">
+            <img src="/images/logo-transparent.png" alt="DésirParent">
+            <span class="nav-logo-text">DésirParent</span>
+        </a>
+        <div class="nav-links">
+            <a href="/connexion" class="nav-link nav-logged-out">Connexion</a>
+            <a href="/inscription" class="nav-link cta nav-logged-out">Créer mon profil</a>
+            <a href="/profil" class="nav-link active nav-logged-in" style="display:none">Mon profil</a>
+            <a href="/notifications" class="nav-link nav-bell nav-logged-in" id="headerBell" style="display:none">🔔</a>
+            <a href="#" class="nav-link logout nav-logged-in logout-btn" style="display:none">Déconnexion</a>
+        </div>
+    </nav>
+
+    <main class="profile-page">
+        <!-- Loading -->
+        <div id="loading" class="loading-state">
+            <div class="spinner"></div>
+            <span>Chargement...</span>
+        </div>
+
+        <!-- Auth required -->
+        <div id="authRequired" class="auth-required hidden">
+            <h2>Connectez-vous</h2>
+            <p>Vous devez être connecté·e pour voir votre profil.</p>
+            <div style="display:flex;gap:0.75rem">
+                <a href="/connexion" class="btn btn-primary">Se connecter</a>
+                <a href="/inscription" class="btn btn-secondary">Créer un compte</a>
+            </div>
+        </div>
+
+        <!-- Profile View -->
+        <div id="profileView" class="hidden">
+            <div class="profile-banner"></div>
+            <div class="profile-content">
+                <div class="profile-card">
+                    <div class="profile-photo-wrap">
+                        <img id="viewPhoto" class="profile-photo" src="" alt="Photo">
+                        <div id="viewPioneer" class="profile-pioneer hidden">🏅</div>
+                    </div>
+                    <div id="viewName" class="profile-name"></div>
+                    <div id="viewMeta" class="profile-meta"></div>
+                    <div id="viewBadges" class="profile-badges"></div>
+                    <div id="viewBio" class="profile-bio hidden"></div>
+                    <div id="viewActions" class="profile-actions">
+                        <button class="btn btn-primary" onclick="enterEditMode()">Modifier mon profil</button>
+                        <a href="/compte" class="btn btn-secondary" style="text-align:center">⭐ Mon abonnement</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Mode -->
+        <div id="editView" class="hidden">
+            <div class="container-sm" style="padding-top:2rem">
+                <div class="edit-card">
+                    <div class="edit-title">✏️ Modifier mon profil</div>
+
+                    <div id="editAlert" class="alert"></div>
+
+                    <div class="edit-photo-area">
+                        <img id="editPhoto" class="edit-photo" src="" alt="Photo" onclick="document.getElementById('editPhotoInput').click()">
+                        <span class="edit-photo-btn" onclick="document.getElementById('editPhotoInput').click()">Changer la photo</span>
+                        <input type="file" id="editPhotoInput" accept="image/*" style="display:none" onchange="handleEditPhoto(this)">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="editName">Prénom</label>
+                        <input type="text" id="editName" class="form-input">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="editAge">Âge</label>
+                            <input type="number" id="editAge" class="form-input" min="18" max="99">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editCity">Ville</label>
+                            <input type="text" id="editCity" class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="editCountry">Pays</label>
+                        <select id="editCountry" class="form-input">
+                            <option value="">Non renseigné</option>
+                            <option value="France">France</option>
+                            <option value="Belgique">Belgique</option>
+                            <option value="Suisse">Suisse</option>
+                            <option value="Canada">Canada</option>
+                            <option value="Luxembourg">Luxembourg</option>
+                            <option value="Maroc">Maroc</option>
+                            <option value="Tunisie">Tunisie</option>
+                            <option value="Algérie">Algérie</option>
+                            <option value="République Démocratique du Congo">République Démocratique du Congo</option>
+                            <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                            <option value="Sénégal">Sénégal</option>
+                            <option value="Autre">Autre</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Genre</label>
+                        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.5rem">
+                            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.9rem">
+                                <input type="radio" name="editGender" value="Femme"> Femme
+                            </label>
+                            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.9rem">
+                                <input type="radio" name="editGender" value="Homme"> Homme
+                            </label>
+                            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.9rem">
+                                <input type="radio" name="editGender" value=""> Préfère ne pas dire
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Catégorie(s)</label>
+                        <div class="cat-checks" id="editCategories">
+                            <div class="cat-check" data-cat="geniteur">
+                                <input type="checkbox" id="edit-cat-geniteur" value="Géniteur">
+                                <label for="edit-cat-geniteur">🧬 Géniteur</label>
+                            </div>
+                            <div class="cat-check" data-cat="coparentalite">
+                                <input type="checkbox" id="edit-cat-coparentalite" value="Coparentalité">
+                                <label for="edit-cat-coparentalite">🤝 Coparentalité</label>
+                            </div>
+                            <div class="cat-check" data-cat="homoparentalite">
+                                <input type="checkbox" id="edit-cat-homoparentalite" value="Homoparentalité">
+                                <label for="edit-cat-homoparentalite">🌈 Homoparentalité</label>
+                            </div>
+                            <div class="cat-check" data-cat="fonder">
+                                <input type="checkbox" id="edit-cat-fonder" value="Fonder une Famille">
+                                <label for="edit-cat-fonder">👶 Fonder une Famille</label>
+                            </div>
+                            <div class="cat-check" data-cat="recomposee">
+                                <input type="checkbox" id="edit-cat-recomposee" value="Famille Recomposée">
+                                <label for="edit-cat-recomposee">🏡 Famille Recomposée</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="editBio">Votre annonce</label>
+                        <textarea id="editBio" class="form-input" rows="4"></textarea>
+                    </div>
+
+                    <div style="display:flex;gap:0.75rem;margin-top:1.5rem">
+                        <button class="btn btn-secondary" onclick="cancelEdit()">Annuler</button>
+                        <button class="btn btn-primary btn-block" id="saveBtn" onclick="saveProfile()">
+                            Enregistrer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav" id="profileBottomNav" style="display:none">
+        <a href="/" class="bottom-nav-item">
+            <span class="bottom-nav-icon">🏠</span>
+            <span>Accueil</span>
+        </a>
+        <a href="/decouvrir" class="bottom-nav-item">
+            <span class="bottom-nav-icon">✨</span>
+            <span>Découvrir</span>
+        </a>
+        <a href="/recherche" class="bottom-nav-item">
+            <span class="bottom-nav-icon">🔍</span>
+            <span>Recherche</span>
+        </a>
+        <a href="/messages" class="bottom-nav-item" id="navMessages">
+            <span class="bottom-nav-icon">💬</span>
+            <span>Messages</span>
+        </a>
+        <a href="/profil" class="bottom-nav-item active">
+            <span class="bottom-nav-icon">👤</span>
+            <span>Profil</span>
+        </a>
+    </nav>
+
+    <script src="/js/app.js"></script>
+    <script>
+    let profileUser = null;
+    let isOwnProfile = false;
+    let editPhotoBase64 = null;
+
+    // Default placeholder
+    const defaultPhoto = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect fill='%23E5E7EB' width='200' height='200'/%3E%3Ccircle cx='100' cy='80' r='35' fill='%239CA3AF'/%3E%3Cellipse cx='100' cy='170' rx='55' ry='45' fill='%239CA3AF'/%3E%3C/svg%3E";
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Check if viewing someone else's profile
+        const pathParts = window.location.pathname.split('/');
+        const profileId = pathParts[2]; // /profil/:id
+
+        const { loggedIn } = await checkAuth();
+        updateNav();
+
+        if (loggedIn) {
+            document.getElementById('profileBottomNav').style.display = 'flex';
+            // Badges painted by app.js global init via checkAuth cache — no extra fetch needed
+        }
+
+        if (profileId) {
+            // Viewing someone's profile
+            try {
+                const data = await API.getProfile(profileId);
+                profileUser = data.user;
+                isOwnProfile = loggedIn && currentUser && currentUser.id == profileId;
+                renderProfile();
+            } catch (err) {
+                document.getElementById('loading').innerHTML =
+                    '<h2 style="color:var(--prune)">Profil non trouvé</h2><a href="/" class="btn btn-primary mt-2">Retour</a>';
+            }
+        } else if (loggedIn) {
+            // Own profile
+            profileUser = currentUser;
+            isOwnProfile = true;
+            renderProfile();
+        } else {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('authRequired').classList.remove('hidden');
+        }
+    });
+
+    function renderProfile() {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('profileView').classList.remove('hidden');
+
+        const user = profileUser;
+
+        // Photo
+        document.getElementById('viewPhoto').src = user.photo_url || defaultPhoto;
+
+        // Pioneer badge
+        if (user.is_pioneer) {
+            document.getElementById('viewPioneer').classList.remove('hidden');
+        }
+
+        // Name
+        document.getElementById('viewName').textContent = user.name || 'Anonyme';
+
+        // Meta (age, city, badges)
+        let metaHTML = '';
+        if (user.age) metaHTML += `<span class="profile-meta-item">📅 ${user.age} ans</span>`;
+        if (user.city) metaHTML += `<span class="profile-meta-item">📍 ${user.city}</span>`;
+        if (user.is_pioneer) metaHTML += `<span class="profile-meta-item badge badge-pioneer">🏅 Pionnier·e</span>`;
+        if (user.is_premium || user.subscription_type === 'premium') {
+            metaHTML += `<span class="profile-meta-item" style="background:linear-gradient(135deg,#e91e8c,#9333ea);color:white;padding:0.2rem 0.6rem;border-radius:100px;font-size:0.78rem;font-weight:700">⭐ Premium</span>`;
+        }
+        document.getElementById('viewMeta').innerHTML = metaHTML;
+
+        // Category badges
+        const cats = Array.isArray(user.categories) ? user.categories : [];
+        document.getElementById('viewBadges').innerHTML = cats.map(c => categoryBadge(c)).join('');
+
+        // Bio
+        if (user.bio) {
+            document.getElementById('viewBio').textContent = user.bio;
+            document.getElementById('viewBio').classList.remove('hidden');
+        }
+
+        // Show edit button only for own profile
+        if (!isOwnProfile) {
+            document.getElementById('viewActions').classList.add('hidden');
+        }
+    }
+
+    function enterEditMode() {
+        document.getElementById('profileView').classList.add('hidden');
+        document.getElementById('editView').classList.remove('hidden');
+
+        const user = profileUser;
+
+        // Populate edit form
+        document.getElementById('editPhoto').src = user.photo_url || defaultPhoto;
+        document.getElementById('editName').value = user.name || '';
+        document.getElementById('editAge').value = user.age || '';
+        document.getElementById('editCity').value = user.city || '';
+        document.getElementById('editCountry').value = user.country || '';
+        document.getElementById('editBio').value = user.bio || '';
+
+        // Set gender radio
+        const genderRadios = document.querySelectorAll('input[name="editGender"]');
+        genderRadios.forEach(r => {
+            r.checked = (r.value === (user.gender || ''));
+        });
+
+        // Check categories
+        const cats = Array.isArray(user.categories) ? user.categories : [];
+        document.querySelectorAll('#editCategories input[type="checkbox"]').forEach(cb => {
+            cb.checked = cats.includes(cb.value);
+        });
+
+        editPhotoBase64 = null;
+    }
+
+    function cancelEdit() {
+        document.getElementById('editView').classList.add('hidden');
+        document.getElementById('profileView').classList.remove('hidden');
+    }
+
+    function handleEditPhoto(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            showAlert('editAlert', 'La photo ne doit pas dépasser 5 Mo.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            editPhotoBase64 = e.target.result;
+            document.getElementById('editPhoto').src = editPhotoBase64;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function saveProfile() {
+        hideAlert('editAlert');
+
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner"></span> Enregistrement...';
+
+        try {
+            const updates = {};
+
+            const name = document.getElementById('editName').value.trim();
+            if (name) updates.name = name;
+
+            const age = document.getElementById('editAge').value;
+            if (age) updates.age = parseInt(age);
+
+            const city = document.getElementById('editCity').value.trim();
+            updates.city = city;
+
+            const country = document.getElementById('editCountry').value.trim();
+            if (country) updates.country = country;
+
+            const gender = document.querySelector('input[name="editGender"]:checked')?.value || null;
+            updates.gender = gender;
+
+            const bio = document.getElementById('editBio').value.trim();
+            updates.bio = bio;
+
+            const categories = [];
+            document.querySelectorAll('#editCategories input:checked').forEach(cb => {
+                categories.push(cb.value);
+            });
+            updates.categories = categories;
+
+            // Upload new photo if changed
+            if (editPhotoBase64) {
+                const uploadResult = await API.uploadPhoto(editPhotoBase64);
+                updates.photo_url = uploadResult.url;
+            }
+
+            const result = await API.updateProfile(updates);
+            profileUser = result.user;
+            currentUser = result.user;
+
+            // Re-render
+            cancelEdit();
+            renderProfile();
+
+            // Brief success feedback
+            showAlert('editAlert', 'Profil mis à jour !', 'success');
+        } catch (err) {
+            showAlert('editAlert', err.message);
+        }
+
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Enregistrer';
+    }
+    </script>
+</body>
+</html>
