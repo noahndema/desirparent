@@ -577,49 +577,41 @@ app.post('/api/auth/resend-verification', requireAuth, async (req, res) => {
   }
 });
 
-// ── Internal: Send Email (for Polsia agent / Postmark MCP) ──
-// Queues emails in DB for processing. Proxy is disabled (returns 200 but never delivers).
+// ── Internal: Send Email (via Resend) ──────────────────────
 app.post('/internal/email/send', async (req, res) => {
   const { to, subject, html_body, text_body, from, from_name, tag } = req.body;
   if (!to || !subject) {
     return res.status(400).json({ error: 'to and subject are required' });
   }
 
-  // Try direct Postmark API if token is available
-  const postmarkToken = process.env.POSTMARK_SERVER_TOKEN;
-  if (postmarkToken) {
+  // Try Resend API if key is available
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (resendApiKey) {
     try {
-      const appUrl = process.env.APP_URL || 'https://www.desirparent.com';
-      const resp = await fetch('https://api.postmarkapp.com/email/send', {
+      const resp = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-Postmark-Server-Token': postmarkToken
+          'Authorization': `Bearer ${resendApiKey}`
         },
         body: JSON.stringify({
-          From: from || 'DésirParent <contact@desirparent.com>',
-          To: to,
-          ReplyTo: 'noreply@desirparent.com',
-          Subject: subject,
-          HtmlBody: html_body || '',
-          TextBody: text_body || '',
-          Tag: tag || 'internal',
-          Headers: [
-            { Name: 'List-Unsubscribe', Value: `<${appUrl}/compte>` },
-            { Name: 'List-Unsubscribe-Post', Value: 'List-Unsubscribe=One-Click' }
-          ],
-          MessageStream: 'outbound'
+          from: 'DésirParent <contact@desirparent.com>',
+          to: [to],
+          reply_to: 'noreply@desirparent.com',
+          subject: subject,
+          html: html_body || '',
+          text: text_body || '',
+          tags: [{ name: 'category', value: tag || 'internal' }]
         })
       });
       if (resp.ok) {
-        console.log(`[email] Internal route: sent via Postmark API to ${to}`);
+        console.log(`[email] Internal route: sent via Resend to ${to}`);
         return res.json({ success: true });
       }
       const errText = await resp.text();
-      console.error(`[email] Internal Postmark error: HTTP ${resp.status} — ${errText.slice(0, 200)}`);
+      console.error(`[email] Internal Resend error: HTTP ${resp.status} — ${errText.slice(0, 200)}`);
     } catch (e) {
-      console.error(`[email] Internal Postmark fetch error: ${e.message}`);
+      console.error(`[email] Internal Resend fetch error: ${e.message}`);
     }
   }
 
@@ -628,7 +620,7 @@ app.post('/internal/email/send', async (req, res) => {
     await pool.query(
       `INSERT INTO email_queue (to_email, subject, html_body, text_body, tag, metadata)
        VALUES ($1, $2, $3, $4, $5, $6::jsonb)`,
-      [to, subject, html_body || '', text_body || '', tag || 'internal', JSON.stringify({ from: from || 'DésirParent', queued_reason: 'no_postmark_token' })]
+      [to, subject, html_body || '', text_body || '', tag || 'internal', JSON.stringify({ from: from || 'DésirParent', queued_reason: 'resend_fallback' })]
     );
     console.log(`[email] Internal route: queued for ${to}`);
     return res.json({ success: true, queued: true });
@@ -1383,7 +1375,7 @@ app.post('/api/messages/:userId', requireAuth, async (req, res) => {
 
         const textBody = `Bonjour ${recipientName},\n\n${senderName} vous a envoye un message sur DesirParent :\n\n"${messagePreview}${content.trim().length > 100 ? '...' : ''}"\n\nLire le message : ${readUrl}\n\n---\nVous recevez cet email car vous etes inscrit sur DesirParent.`;
 
-        // ── Send via shared sendTransactionalEmail (Postmark -> DB queue) ──
+        // ── Send via shared sendTransactionalEmail (Resend -> DB queue) ──
         // Uses the same path as verification/welcome/payment emails.
         console.log(`[notif-email] Sending notification to ${receiver.email} from ${senderName} (sender ${senderId})`);
         await sendTransactionalEmail({
@@ -1718,7 +1710,7 @@ async function sendPaymentConfirmationEmail(userEmail, userName, planConfig, pla
 
   const textBody = `Bonjour ${firstName},\n\nMerci pour votre achat ! Votre abonnement ${tierLabel} est maintenant actif.\n\nRécapitulatif :\n- Abonnement : ${tierLabel}\n- Durée : ${durationLabel}\n- Valide jusqu'au : ${expiryFormatted}\n- Montant payé : ${priceFormatted} €\n\nProfitez de DésirParent : ${appUrl}/decouvrir\n\n---\nDésirParent — Trouvez votre partenaire parentalité`;
 
-  // Use centralized sender (Postmark direct → proxy → DB queue fallback)
+  // Use centralized sender (Resend → DB queue fallback)
   const subject = `Confirmation de paiement - Abonnement ${tierLabel} DesirParent`;
   return sendTransactionalEmail({ toEmail: userEmail, subject, html: htmlBody, textBody, tag: 'payment_confirmation' });
 }
@@ -2252,9 +2244,7 @@ async function recordRegistrationAttempt(ip) {
 // ── Email Verification Sender ─────────────────────────────
 // Spam-fix: ASCII-only from_name, no emoji in subject/CTA, List-Unsubscribe, clean HTML
 async function sendVerificationEmail(toEmail, verifyUrl, userName) {
-  const postmarkToken = process.env.POSTMARK_SERVER_TOKEN;
-  const apiKey = process.env.POLSIA_API_KEY;
-  const baseUrl = (process.env.POLSIA_R2_BASE_URL || 'https://polsia.com').replace(/\/$/, '');
+  const resendApiKey = process.env.RESEND_API_KEY;
   const appUrl = process.env.APP_URL || 'https://www.desirparent.com';
   const unsubUrl = `${appUrl}/compte`;
 
@@ -2283,85 +2273,48 @@ async function sendVerificationEmail(toEmail, verifyUrl, userName) {
 
   const textBody = `Bonjour ${userName || ''},\n\nConfirmez votre email DesirParent :\n${verifyUrl}\n\nCe lien expire dans 24 heures.\n\nSi vous n'avez pas cree de compte, ignorez cet email.\n\n--\nDesirParent - Trouvez votre partenaire parentalite\nGerer mes preferences : ${unsubUrl}`;
 
-  // ── Strategy 1: Direct Postmark API ──────────────────────
-  if (postmarkToken) {
+  // ── Strategy 1: Resend API ────────────────────────────────
+  if (resendApiKey) {
     try {
-      const postmarkResp = await fetch('https://api.postmarkapp.com/email/send', {
+      const resendResp = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-Postmark-Server-Token': postmarkToken
+          'Authorization': `Bearer ${resendApiKey}`
         },
         body: JSON.stringify({
-          From: 'DésirParent <contact@desirparent.com>',
-          To: toEmail,
-          ReplyTo: 'noreply@desirparent.com',
-          Subject: subject,
-          HtmlBody: html,
-          TextBody: textBody,
-          Tag: 'email_verification',
-          Headers: [
-            { Name: 'List-Unsubscribe', Value: `<${unsubUrl}>` },
-            { Name: 'List-Unsubscribe-Post', Value: 'List-Unsubscribe=One-Click' }
-          ],
-          MessageStream: 'outbound'
+          from: 'DésirParent <contact@desirparent.com>',
+          to: [toEmail],
+          reply_to: 'noreply@desirparent.com',
+          subject: subject,
+          html: html,
+          text: textBody,
+          tags: [{ name: 'category', value: 'email_verification' }]
         })
       });
 
-      if (postmarkResp.ok) {
-        console.log(`[email] Verification email sent via Postmark API to ${toEmail}`);
+      if (resendResp.ok) {
+        console.log(`[email] Verification email sent via Resend to ${toEmail}`);
         return true;
       }
 
-      const bodyText = await postmarkResp.text();
-      console.error(`[email] Postmark API error for ${toEmail}: HTTP ${postmarkResp.status} — ${bodyText.slice(0, 300)}`);
-    } catch (postmarkErr) {
-      console.error(`[email] Postmark fetch error for ${toEmail}: ${postmarkErr.message}`);
+      const bodyText = await resendResp.text();
+      console.error(`[email] Resend API error for ${toEmail}: HTTP ${resendResp.status} — ${bodyText.slice(0, 300)}`);
+    } catch (resendErr) {
+      console.error(`[email] Resend fetch error for ${toEmail}: ${resendErr.message}`);
     }
   } else {
-    console.log(`[email] No POSTMARK_SERVER_TOKEN — skipping direct Postmark API for ${toEmail}`);
+    console.log(`[email] No RESEND_API_KEY — skipping Resend API for ${toEmail}`);
   }
 
-  // ── Strategy 2: Polsia email proxy ─────────────
-  // Proxy forwards with contact@desirparent.com as From.
-  // Re-enabled: garbled FROM is better than zero delivery.
-  if (apiKey) {
-    try {
-      const proxyResp = await fetch(`${baseUrl}/api/proxy/email/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          to: toEmail,
-          subject,
-          body: textBody || '',
-          html
-        })
-      });
-      const proxyBody = await proxyResp.text();
-      let proxyData;
-      try { proxyData = JSON.parse(proxyBody); } catch { proxyData = {}; }
-      if (proxyResp.ok && proxyData.success !== false) {
-        console.log(`[email] Verification sent via Polsia proxy to ${toEmail} (message_id: ${proxyData.message_id || 'n/a'})`);
-        return true;
-      }
-      console.error(`[email] Proxy error for verification/${toEmail}: HTTP ${proxyResp.status} — ${proxyBody.slice(0, 200)}`);
-    } catch (proxyErr) {
-      console.error(`[email] Proxy fetch error for verification/${toEmail}: ${proxyErr.message}`);
-    }
-  }
-
-  // ── Strategy 3: Queue in DB as last resort ──
+  // ── Strategy 2: Queue in DB as last resort ──
   try {
     await pool.query(
       `INSERT INTO email_queue (to_email, subject, html_body, text_body, tag, metadata)
        VALUES ($1, $2, $3, $4, 'email_verification', $5::jsonb)`,
-      [toEmail, subject, html, textBody, JSON.stringify({ verify_url: verifyUrl, queued_reason: 'proxy_fallback' })]
+      [toEmail, subject, html, textBody, JSON.stringify({ verify_url: verifyUrl, queued_reason: 'resend_fallback' })]
     );
-    console.log(`[email] Verification queued in DB for ${toEmail} — proxy and Postmark both failed`);
+    console.log(`[email] Verification queued in DB for ${toEmail} — Resend failed`);
   } catch (queueErr) {
     console.error(`[email] Failed to queue verification for ${toEmail}: ${queueErr.message}`);
   }
@@ -2369,90 +2322,50 @@ async function sendVerificationEmail(toEmail, verifyUrl, userName) {
   return false;
 }
 
-// ── Shared Email Sender (Postmark → Polsia proxy) ─────────
-// Spam-fix: ASCII-only from_name, List-Unsubscribe on all emails
+// ── Shared Email Sender (Resend) ──────────────────────────
 async function sendTransactionalEmail({ toEmail, subject, html, textBody, tag }) {
-  const postmarkToken = process.env.POSTMARK_SERVER_TOKEN;
-  const apiKey = process.env.POLSIA_API_KEY;
-  const baseUrl = (process.env.POLSIA_R2_BASE_URL || 'https://polsia.com').replace(/\/$/, '');
+  const resendApiKey = process.env.RESEND_API_KEY;
   const appUrl = process.env.APP_URL || 'https://www.desirparent.com';
   const unsubUrl = `${appUrl}/compte`;
 
-  // Strategy 1: Direct Postmark API
-  if (postmarkToken) {
+  // Strategy 1: Resend API
+  if (resendApiKey) {
     try {
-      const resp = await fetch('https://api.postmarkapp.com/email/send', {
+      const resp = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-Postmark-Server-Token': postmarkToken
+          'Authorization': `Bearer ${resendApiKey}`
         },
         body: JSON.stringify({
-          From: 'DésirParent <contact@desirparent.com>',
-          To: toEmail,
-          ReplyTo: 'noreply@desirparent.com',
-          Subject: subject,
-          HtmlBody: html,
-          TextBody: textBody,
-          Tag: tag,
-          Headers: [
-            { Name: 'List-Unsubscribe', Value: `<${unsubUrl}>` },
-            { Name: 'List-Unsubscribe-Post', Value: 'List-Unsubscribe=One-Click' }
-          ],
-          MessageStream: 'outbound'
+          from: 'DésirParent <contact@desirparent.com>',
+          to: [toEmail],
+          reply_to: 'noreply@desirparent.com',
+          subject: subject,
+          html: html,
+          text: textBody,
+          tags: [{ name: 'category', value: tag }]
         })
       });
       if (resp.ok) {
-        console.log(`[email] ${tag} sent via Postmark to ${toEmail}`);
+        console.log(`[email] ${tag} sent via Resend to ${toEmail}`);
         return true;
       }
       const errText = await resp.text();
-      console.error(`[email] Postmark error for ${tag}/${toEmail}: HTTP ${resp.status} — ${errText.slice(0, 200)}`);
+      console.error(`[email] Resend error for ${tag}/${toEmail}: HTTP ${resp.status} — ${errText.slice(0, 200)}`);
     } catch (e) {
-      console.error(`[email] Postmark fetch error for ${tag}/${toEmail}: ${e.message}`);
+      console.error(`[email] Resend fetch error for ${tag}/${toEmail}: ${e.message}`);
     }
   }
 
-  // Strategy 2: Polsia email proxy
-  // Proxy forwards with contact@desirparent.com as From.
-  // Re-enabled: garbled FROM is better than zero emails delivered.
-  if (apiKey) {
-    try {
-      const proxyResp = await fetch(`${baseUrl}/api/proxy/email/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          to: toEmail,
-          subject,
-          body: textBody || '',
-          html
-        })
-      });
-      const proxyBody = await proxyResp.text();
-      let proxyData;
-      try { proxyData = JSON.parse(proxyBody); } catch { proxyData = {}; }
-      if (proxyResp.ok && proxyData.success !== false) {
-        console.log(`[email] ${tag} sent via Polsia proxy to ${toEmail} (message_id: ${proxyData.message_id || 'n/a'})`);
-        return true;
-      }
-      console.error(`[email] Proxy error for ${tag}/${toEmail}: HTTP ${proxyResp.status} — ${proxyBody.slice(0, 200)}`);
-    } catch (proxyErr) {
-      console.error(`[email] Proxy fetch error for ${tag}/${toEmail}: ${proxyErr.message}`);
-    }
-  }
-
-  // Strategy 3: Queue in DB as last resort
+  // Strategy 2: Queue in DB as last resort
   try {
     await pool.query(
       `INSERT INTO email_queue (to_email, subject, html_body, text_body, tag, metadata)
        VALUES ($1, $2, $3, $4, $5, $6::jsonb)`,
-      [toEmail, subject, html, textBody || '', tag, JSON.stringify({ queued_reason: 'proxy_fallback' })]
+      [toEmail, subject, html, textBody || '', tag, JSON.stringify({ queued_reason: 'resend_fallback' })]
     );
-    console.log(`[email] ${tag} queued in DB for ${toEmail} — proxy and Postmark both failed`);
+    console.log(`[email] ${tag} queued in DB for ${toEmail} — Resend failed`);
   } catch (queueErr) {
     console.error(`[email] Failed to queue ${tag} for ${toEmail}: ${queueErr.message}`);
   }
