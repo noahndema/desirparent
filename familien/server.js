@@ -54,20 +54,15 @@ const PLAN_CONFIG = {
 // Each link is configured with success_url → /compte?plan=X&status=success
 // Updated 2026-05-03: added recurring subscription links
 const STRIPE_LINKS = {
-  'standard_1m':  'https://buy.stripe.com/00w9AT9Q2fSEdAAehsdlI1U',
-  'standard_3m':  'https://buy.stripe.com/3cIbJ15zMfSE7cc0qCdlI1V',
-  'standard_6m':  'https://buy.stripe.com/6oU3cv7HU0XKdAAddodlI1W',
-  'standard_12m': 'https://buy.stripe.com/28EaEX1jwcGs6888X8dlI1X',
-  'premium_1m':   'https://buy.stripe.com/14A7sLaU65e0aoo2yKdlI1Y',
-  'premium_3m':   'https://buy.stripe.com/dRm3cv1jw5e07ccgpAdlI1Z',
-  'premium_6m':   'https://buy.stripe.com/5kQfZh0fsdKw0NO3COdlI20',
-  'premium_12m':  'https://buy.stripe.com/8x2bJ1aU68qc5444GSdlI21',
-  // Recurring monthly — auto-billed, annulez à tout moment
-  'standard_recurring': 'https://buy.stripe.com/14A7sL3rEdKw400c9kdlM0u',
-  'premium_recurring':  'https://buy.stripe.com/bJeaEX0fs5e0bssc9kdlM0v',
+  const STRIPE_LINKS = {
+  'standard_1m': 'https://buy.stripe.com/bJe7sM9e11gY2aI8sefUQ00',
+  'standard_3m': 'https://buy.stripe.com/dRm5kEeylf7OaHegYKfUQ01',
+  'standard_6m': 'https://buy.stripe.com/5kQ8wQ0Hv7FmeXu37UfUQ02',
+  'standard_12m': 'https://buy.stripe.com/00w6oIbm92l2bLi6k6fUQ03',
+  'premium_1m': 'https://buy.stripe.com/6oUbJ23TH9Nu6qY4bYfUQ04',
+  'premium_3m': 'https://buy.stripe.com/7sYfZibm91gYaHefUGfUQ05',
 };
-
-// ── Middleware ─────────────────────────────────────────────
+  // ── Middleware ─────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
