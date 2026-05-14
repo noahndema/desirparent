@@ -54,7 +54,7 @@ const PLAN_CONFIG = {
 // Each link is configured with success_url → /compte?plan=X&status=success
 // Updated 2026-05-03: added recurring subscription links
 const STRIPE_LINKS = {
-  const STRIPE_LINKS = {
+  
   'standard_1m': 'https://buy.stripe.com/bJe7sM9e11gY2aI8sefUQ00',
   'standard_3m': 'https://buy.stripe.com/dRm5kEeylf7OaHegYKfUQ01',
   'standard_6m': 'https://buy.stripe.com/5kQ8wQ0Hv7FmeXu37UfUQ02',
