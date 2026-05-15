@@ -1905,7 +1905,41 @@ app.post('/api/subscription/activate', requireAuth, async (req, res) => {
 app.get('/api/subscription/links', (req, res) => {
   res.json({ links: STRIPE_LINKS });
 });
+// ── Stripe Webhook ────────────────────────────────────────
+app.post('/webhook/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+  let event;
+  try {
+    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+  } catch (err) {
+    console.error('[webhook] Signature error:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === 'checkout.session.completed' || event.type === 'invoice.paid') {
+    const session = event.data.object;
+    const customerEmail = session.customer_email || session.customer_details?.email;
+    if (customerEmail) {
+      try {
+        const planType = session.amount_total <= 1000 ? 'standard' : 'premium';
+        const expiresAt = new Date();
+        expiresAt.setMonth(expiresAt.getMonth() + 12);
+        await pool.query(
+          `UPDATE users SET subscription_type = $1, plan = $1, subscription_expires_at = $2 WHERE LOWER(email) = LOWER($3)`,
+          [planType, expiresAt.toISOString(), customerEmail]
+        );
+        console.log(`[webhook] Activated ${planType} for ${customerEmail}`);
+      } catch (err) {
+        console.error('[webhook] DB error:', err.message);
+      }
+    }
+  }
+
+  res.json({ received: true });
+});
 // ── Admin Auth ────────────────────────────────────────────
 const adminSessions = new Set();
 
