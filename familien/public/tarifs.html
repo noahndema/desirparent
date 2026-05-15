@@ -264,14 +264,6 @@
 
         .feature-item.highlight-msg { color: #374151; }
 
-        .feature-note {
-            font-size: 0.72rem;
-            color: #9CA3AF;
-            margin-left: 1.5rem;
-            margin-top: -0.35rem;
-            margin-bottom: 0.75rem;
-        }
-
         /* ── CTA BUTTON ─────────────────────────── */
         .plan-btn {
             display: block;
@@ -374,105 +366,6 @@
             box-shadow: 0 6px 20px rgba(245, 146, 42, 0.5);
         }
 
-        .premium-gradient-text {
-            background: linear-gradient(135deg, #F5922A, #F97316);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* ── DURATION TABS ──────────────────────── */
-        .duration-section {
-            background: var(--white);
-            border-radius: 20px;
-            border: 2px solid #E5E7EB;
-            padding: 1.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .duration-section h3 {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: var(--prune);
-            margin-bottom: 0.25rem;
-        }
-
-        .duration-section h3 .plan-tag {
-            font-size: 0.8rem;
-            font-weight: 700;
-            padding: 0.2rem 0.6rem;
-            border-radius: 100px;
-            margin-left: 0.5rem;
-            vertical-align: middle;
-        }
-
-        .tag-standard {
-            background: rgba(232, 24, 90, 0.1);
-            color: var(--brand-primary);
-        }
-
-        .tag-premium {
-            background: rgba(245, 146, 42, 0.15);
-            color: #D97706;
-        }
-
-        .duration-section .section-sub {
-            font-size: 0.82rem;
-            color: #9CA3AF;
-            margin-bottom: 1.25rem;
-        }
-
-        .duration-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.75rem;
-        }
-
-        .duration-btn {
-            display: block;
-            padding: 0.9rem 0.5rem;
-            border-radius: 14px;
-            text-align: center;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.95rem;
-            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-            border: 2px solid #E5E7EB;
-            background: var(--brand-bg);
-            color: var(--prune);
-        }
-
-        .duration-btn:hover {
-            border-color: var(--brand-primary);
-            background: white;
-            text-decoration: none;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 14px rgba(232, 24, 90, 0.1);
-        }
-
-        .duration-btn .dur-period {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: #9CA3AF;
-            margin-bottom: 0.15rem;
-        }
-
-        .duration-btn .dur-price {
-            display: block;
-            font-size: 1.05rem;
-            font-weight: 800;
-        }
-
-        .duration-btn .dur-save {
-            display: block;
-            font-size: 0.68rem;
-            color: var(--brand-green);
-            font-weight: 700;
-            margin-top: 0.1rem;
-        }
-
         /* ── REASSURANCE ───────────────────────── */
         .reassurance {
             background: var(--white);
@@ -547,15 +440,11 @@
             .plan-card.plan-standard {
                 order: -1;
             }
-            .duration-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
 
         @media (max-width: 480px) {
             .tarifs-hero { padding: 4rem 1.25rem 2.5rem; }
             .plan-card { padding: 1.5rem 1.25rem; }
-            .duration-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -640,7 +529,7 @@
                 <div class="plan-popular-badge">LE PLUS POPULAIRE</div>
                 <div class="plan-label">Recommandé</div>
                 <div class="plan-name">Standard</div>
-                <div class="plan-price">9€<span>/ mois</span></div>
+                <div class="plan-price">9,99€<span>/ mois</span></div>
                 <div class="plan-price-note">Abonnement mensuel · Annulez à tout moment</div>
 
                 <ul class="feature-list">
@@ -674,14 +563,14 @@
                     </li>
                 </ul>
 
-                <a href="https://buy.stripe.com/14A7sL3rEdKw400c9kdlM0u" target="_blank" rel="noopener" class="plan-btn plan-btn-standard">S'abonner à Standard</a>
+                <a href="https://buy.stripe.com/7sYaEYeyl8Jq2aIcIufUQ06" target="_blank" rel="noopener" class="plan-btn plan-btn-standard">S'abonner à Standard</a>
             </div>
 
             <!-- ── COL 3: PREMIUM ──────────────────── -->
             <div class="plan-card plan-premium">
                 <div class="plan-label">Accès total</div>
                 <div class="plan-name">⭐ Premium</div>
-                <div class="plan-price">19€<span>/ mois</span></div>
+                <div class="plan-price">19,99€<span>/ mois</span></div>
                 <div class="plan-price-note">Abonnement mensuel · Annulez à tout moment</div>
 
                 <ul class="feature-list">
@@ -715,78 +604,7 @@
                     </li>
                 </ul>
 
-                <a href="https://buy.stripe.com/bJeaEX0fs5e0bssc9kdlM0v" target="_blank" rel="noopener" class="plan-btn plan-btn-premium">S'abonner à Premium</a>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- DURATION SECTION -->
-    <section class="pricing-section" style="padding-top: 0">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items:start;">
-
-            <!-- Standard durations -->
-            <div class="duration-section">
-                <h3>Standard <span class="plan-tag tag-standard">à partir de 9€ / mois</span></h3>
-                <p class="section-sub">Messagerie illimitée avec les abonnés Standard et Premium</p>
-                <div class="duration-grid">
-                    <a href="https://buy.stripe.com/14A7sL3rEdKw400c9kdlM0u" target="_blank" rel="noopener" class="duration-btn" style="border:2px solid var(--brand-primary); position:relative;">
-                        <span class="dur-period">Mensuel 🔄</span>
-                        <span class="dur-price">9€</span>
-                        <span class="dur-save">Annulez à tout moment</span>
-                    </a>
-                    <a href="https://buy.stripe.com/00w9AT9Q2fSEdAAehsdlI1U" target="_blank" rel="noopener" class="duration-btn">
-                        <span class="dur-period">1 mois</span>
-                        <span class="dur-price">9,99€</span>
-                    </a>
-                    <a href="https://buy.stripe.com/3cIbJ15zMfSE7cc0qCdlI1V" target="_blank" rel="noopener" class="duration-btn">
-                        <span class="dur-period">3 mois</span>
-                        <span class="dur-price">24,99€</span>
-                        <span class="dur-save">Économisez 17%</span>
-                    </a>
-                    <a href="https://buy.stripe.com/6oU3cv7HU0XKdAAddodlI1W" target="_blank" rel="noopener" class="duration-btn">
-                        <span class="dur-period">6 mois</span>
-                        <span class="dur-price">39,99€</span>
-                        <span class="dur-save">Économisez 33%</span>
-                    </a>
-                    <a href="https://buy.stripe.com/28EaEX1jwcGs6888X8dlI1X" target="_blank" rel="noopener" class="duration-btn">
-                        <span class="dur-period">12 mois</span>
-                        <span class="dur-price">59,99€</span>
-                        <span class="dur-save">Économisez 50%</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Premium durations -->
-            <div class="duration-section">
-                <h3>⭐ Premium <span class="plan-tag tag-premium">à partir de 19€ / mois</span></h3>
-                <p class="section-sub">Messagerie illimitée avec TOUS les profils + badge ⭐</p>
-                <div class="duration-grid">
-                    <a href="https://buy.stripe.com/bJeaEX0fs5e0bssc9kdlM0v" target="_blank" rel="noopener" class="duration-btn" style="border:2px solid #F5922A; position:relative;">
-                        <span class="dur-period">Mensuel 🔄</span>
-                        <span class="dur-price">19€</span>
-                        <span class="dur-save">Annulez à tout moment</span>
-                    </a>
-                    <a href="https://buy.stripe.com/14A7sLaU65e0aoo2yKdlI1Y" target="_blank" rel="noopener" class="duration-btn">
-                        <span class="dur-period">1 mois</span>
-                        <span class="dur-price">19,99€</span>
-                    </a>
-                    <a href="https://buy.stripe.com/dRm3cv1jw5e07ccgpAdlI1Z" target="_blank" rel="noopener" class="duration-btn">
-                        <span class="dur-period">3 mois</span>
-                        <span class="dur-price">49,99€</span>
-                        <span class="dur-save">Économisez 17%</span>
-                    </a>
-                    <a href="https://buy.stripe.com/5kQfZh0fsdKw0NO3COdlI20" target="_blank" rel="noopener" class="duration-btn">
-                        <span class="dur-period">6 mois</span>
-                        <span class="dur-price">79,99€</span>
-                        <span class="dur-save">Économisez 33%</span>
-                    </a>
-                    <a href="https://buy.stripe.com/8x2bJ1aU68qc5444GSdlI21" target="_blank" rel="noopener" class="duration-btn">
-                        <span class="dur-period">12 mois</span>
-                        <span class="dur-price">119,99€</span>
-                        <span class="dur-save">Économisez 50%</span>
-                    </a>
-                </div>
+                <a href="https://buy.stripe.com/dRm14ocqd5xe5mU23QfUQ07" target="_blank" rel="noopener" class="plan-btn plan-btn-premium">S'abonner à Premium</a>
             </div>
 
         </div>
@@ -811,21 +629,5 @@
         <div class="footer-sub">La plateforme francophone de coparentalité</div>
     </footer>
 
-    <!-- Polsia Analytics -->
-    <script>
-    (function() {
-        var slug = '__POLSIA_SLUG__';
-        if (!slug) return;
-        var vid = localStorage.getItem('polsia_vid');
-        if (!vid) {
-            vid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                var r = Math.random() * 16 | 0;
-                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-            });
-            localStorage.setItem('polsia_vid', vid);
-        }
-        new Image().src = 'https://polsia.com/api/beacon/pixel?s=' + encodeURIComponent(slug) + '&v=' + encodeURIComponent(vid);
-    })();
-    </script>
 </body>
 </html>
