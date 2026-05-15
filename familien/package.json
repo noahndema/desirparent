@@ -1,18 +1,18 @@
 {
-"name": "express-postgres-starter",
-"version": "1.0.0",
-"main": "server.js",
-"scripts": {
-"start": "node server.js",
-"dev": "node server.js",
-"build": "echo 'build ok'",
-"migrate": "node migrate.js"
-},
-"dependencies": {"dépendances": {
-  "exprimer": "^4.18.2",
-  "openai": "^4.77.0",
-  "pg": "^8.11.3",
-  "pointu": "^0.33.0",
-  "stripe": "^14.0.0"
-}
+  "name": "express-postgres-starter",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'build ok'",
+    "migrate": "node migrate.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "openai": "^4.77.0",
+    "pg": "^8.11.3",
+    "dotenv": "^0.33.0",
+    "stripe": "^14.0.0"
+  }
 }
