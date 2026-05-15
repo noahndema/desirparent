@@ -8,10 +8,11 @@
 "build": "echo 'build ok'",
 "migrate": "node migrate.js"
 },
-"dependencies": {
-"express": "^4.18.2",
-"openai": "^4.77.0",
-"pg": "^8.11.3",
-"sharp": "^0.33.0"
+"dependencies": {"dépendances": {
+  "exprimer": "^4.18.2",
+  "openai": "^4.77.0",
+  "pg": "^8.11.3",
+  "pointu": "^0.33.0",
+  "stripe": "^14.0.0"
 }
 }
