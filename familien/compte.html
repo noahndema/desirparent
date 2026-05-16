@@ -16,8 +16,6 @@
             max-width: 520px;
             margin: 0 auto;
         }
-
-        /* ── Page header ─────────────────────────────── */
         .compte-header {
             background: linear-gradient(135deg, var(--prune), #5b1a8a);
             color: var(--white);
@@ -28,7 +26,6 @@
             align-items: center;
             gap: 1rem;
         }
-
         .compte-avatar {
             width: 56px;
             height: 56px;
@@ -37,14 +34,12 @@
             border: 3px solid rgba(255,255,255,0.4);
             flex-shrink: 0;
         }
-
         .compte-header-info h2 {
             font-family: 'Syne', sans-serif;
             font-size: 1.2rem;
             font-weight: 800;
             margin-bottom: 0.15rem;
         }
-
         .compte-header-info .logout-link {
             color: rgba(255,255,255,0.6);
             font-size: 0.8rem;
@@ -55,8 +50,6 @@
             padding: 0;
         }
         .compte-header-info .logout-link:hover { color: #fff; }
-
-        /* ── Current subscription card ───────────────── */
         .sub-status-card {
             background: var(--white);
             border-radius: var(--radius);
@@ -65,17 +58,14 @@
             box-shadow: var(--shadow-sm);
             border: 1.5px solid var(--gray-300);
         }
-
         .sub-status-card.active-standard {
             border-color: var(--lavande);
             background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
         }
-
         .sub-status-card.active-premium {
             border-color: #e91e8c;
             background: linear-gradient(135deg, #fff0f8 0%, #fce7f3 100%);
         }
-
         .sub-status-label {
             font-size: 0.75rem;
             font-weight: 600;
@@ -84,14 +74,12 @@
             color: var(--gray-500);
             margin-bottom: 0.4rem;
         }
-
         .sub-status-tier {
             font-family: 'Syne', sans-serif;
             font-size: 1.25rem;
             font-weight: 800;
             color: var(--prune);
         }
-
         .sub-status-tier .tier-badge-premium {
             display: inline-flex;
             align-items: center;
@@ -102,7 +90,6 @@
             border-radius: var(--radius-full);
             font-size: 0.85rem;
         }
-
         .sub-status-tier .tier-badge-standard {
             display: inline-flex;
             align-items: center;
@@ -113,14 +100,11 @@
             border-radius: var(--radius-full);
             font-size: 0.85rem;
         }
-
         .sub-expires {
             font-size: 0.82rem;
             color: var(--gray-500);
             margin-top: 0.3rem;
         }
-
-        /* ── Success alert ───────────────────────────── */
         .success-banner {
             background: #d1fae5;
             border: 1.5px solid #6ee7b7;
@@ -131,8 +115,6 @@
             font-weight: 600;
             display: none;
         }
-
-        /* ── Section title ───────────────────────────── */
         .section-title {
             font-family: 'Syne', sans-serif;
             font-size: 1rem;
@@ -141,19 +123,13 @@
             margin-bottom: 0.75rem;
             letter-spacing: -0.01em;
         }
-
         .section-subtitle {
             font-size: 0.82rem;
             color: var(--gray-500);
             margin-top: -0.5rem;
             margin-bottom: 0.9rem;
         }
-
-        /* ── Plan cards ──────────────────────────────── */
-        .plans-group {
-            margin-bottom: 1.75rem;
-        }
-
+        .plans-group { margin-bottom: 1.75rem; }
         .plan-card {
             background: var(--white);
             border-radius: var(--radius);
@@ -167,21 +143,8 @@
             gap: 0.75rem;
             transition: var(--transition);
         }
-
-        .plan-card:hover {
-            border-color: var(--lavande);
-            box-shadow: var(--shadow-md);
-        }
-
-        .plan-card.premium-card:hover {
-            border-color: #e91e8c;
-        }
-
-        .plan-card.current-plan {
-            border-color: #6ee7b7;
-            background: #f0fdf4;
-        }
-
+        .plan-card:hover { border-color: var(--lavande); box-shadow: var(--shadow-md); }
+        .plan-card.premium-card:hover { border-color: #e91e8c; }
         .plan-left {
             display: flex;
             align-items: center;
@@ -189,7 +152,6 @@
             flex: 1;
             min-width: 0;
         }
-
         .plan-icon {
             width: 36px;
             height: 36px;
@@ -201,13 +163,8 @@
             font-size: 1rem;
             flex-shrink: 0;
         }
-
-        .premium-card .plan-icon {
-            background: linear-gradient(135deg, #fce7f3, #f3e8ff);
-        }
-
+        .premium-card .plan-icon { background: linear-gradient(135deg, #fce7f3, #f3e8ff); }
         .plan-info { min-width: 0; }
-
         .plan-name {
             font-weight: 700;
             font-size: 0.92rem;
@@ -216,14 +173,12 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
         .plan-desc {
             font-size: 0.75rem;
             color: var(--gray-500);
             line-height: 1.3;
             margin-top: 0.1rem;
         }
-
         .plan-right {
             display: flex;
             flex-direction: column;
@@ -231,7 +186,6 @@
             gap: 0.4rem;
             flex-shrink: 0;
         }
-
         .plan-price-btn {
             background: var(--lavande);
             color: var(--white);
@@ -246,35 +200,9 @@
             display: inline-block;
             transition: var(--transition);
         }
-
-        .plan-price-btn:hover {
-            background: #6d28d9;
-            text-decoration: none;
-            color: var(--white);
-        }
-
-        .premium-card .plan-price-btn {
-            background: linear-gradient(135deg, #e91e8c, #9333ea);
-        }
-
-        .premium-card .plan-price-btn:hover {
-            background: linear-gradient(135deg, #c2185b, #7e22ce);
-            color: var(--white);
-        }
-
-        .plan-price-btn.current-btn {
-            background: #6ee7b7;
-            color: #065f46;
-            cursor: default;
-        }
-
-        .plan-savings {
-            font-size: 0.7rem;
-            color: #059669;
-            font-weight: 600;
-        }
-
-        /* ── What's included info ────────────────────── */
+        .plan-price-btn:hover { background: #6d28d9; text-decoration: none; color: var(--white); }
+        .premium-card .plan-price-btn { background: linear-gradient(135deg, #e91e8c, #9333ea); }
+        .premium-card .plan-price-btn:hover { background: linear-gradient(135deg, #c2185b, #7e22ce); color: var(--white); }
         .tier-features {
             background: var(--white);
             border-radius: var(--radius);
@@ -282,38 +210,10 @@
             margin-bottom: 1.5rem;
             box-shadow: var(--shadow-sm);
         }
-
-        .tier-feature-title {
-            font-weight: 700;
-            font-size: 0.88rem;
-            color: var(--prune);
-            margin-bottom: 0.6rem;
-        }
-
-        .tier-feature-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        .tier-feature-list li {
-            font-size: 0.82rem;
-            color: var(--gray-600);
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-
-        .tier-feature-list li::before {
-            content: '✓';
-            color: var(--teal);
-            font-weight: 800;
-            flex-shrink: 0;
-            margin-top: 0.05rem;
-        }
-
-        /* ── Auth required ────────────────────────────── */
+        .tier-feature-title { font-weight: 700; font-size: 0.88rem; color: var(--prune); margin-bottom: 0.6rem; }
+        .tier-feature-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+        .tier-feature-list li { font-size: 0.82rem; color: var(--gray-600); display: flex; align-items: flex-start; gap: 0.5rem; }
+        .tier-feature-list li::before { content: '✓'; color: var(--teal); font-weight: 800; flex-shrink: 0; margin-top: 0.05rem; }
         .auth-required {
             display: flex;
             flex-direction: column;
@@ -324,14 +224,7 @@
             padding: 2rem;
             gap: 1.5rem;
         }
-
-        .auth-required h2 {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--prune);
-        }
-
+        .auth-required h2 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--prune); }
         .loading-state {
             display: flex;
             flex-direction: column;
@@ -345,7 +238,6 @@
 </head>
 <body class="has-bottom-nav">
 
-    <!-- NAV -->
     <nav class="nav">
         <a href="/" class="nav-logo">
             <img src="/images/logo-transparent.png" alt="DésirParent">
@@ -361,13 +253,11 @@
     </nav>
 
     <main style="padding-top:64px">
-        <!-- Loading -->
         <div id="loading" class="loading-state">
             <div class="spinner"></div>
             <span>Chargement...</span>
         </div>
 
-        <!-- Auth required -->
         <div id="authRequired" class="auth-required hidden">
             <h2>Connectez-vous</h2>
             <p style="color:var(--gray-500)">Vous devez être connecté·e pour gérer votre abonnement.</p>
@@ -377,10 +267,8 @@
             </div>
         </div>
 
-        <!-- Main content -->
         <div id="mainContent" class="compte-page hidden">
 
-            <!-- User header -->
             <div class="compte-header">
                 <img id="userAvatar" class="compte-avatar" src="" alt="Avatar">
                 <div class="compte-header-info">
@@ -389,19 +277,16 @@
                 </div>
             </div>
 
-            <!-- Success banner (shown after Stripe redirect) -->
             <div id="successBanner" class="success-banner">
-                🎉 Abonnement activé ! Bienvenue dans l'aventure DésirParent Premium.
+                🎉 Abonnement activé ! Bienvenue dans l'aventure DésirParent.
             </div>
 
-            <!-- Current subscription -->
             <div id="subStatusCard" class="sub-status-card">
                 <div class="sub-status-label">Abonnement actuel</div>
                 <div id="subStatusTier" class="sub-status-tier">Gratuit</div>
                 <div id="subStatusExpires" class="sub-expires"></div>
             </div>
 
-            <!-- Features comparison -->
             <div class="tier-features">
                 <div class="tier-feature-title">Comparaison des offres</div>
                 <ul class="tier-feature-list">
@@ -411,136 +296,49 @@
                 </ul>
             </div>
 
-            <!-- Standard plans -->
+            <!-- Standard -->
             <div class="plans-group">
                 <div class="section-title">Standard</div>
                 <div class="section-subtitle">Communiquez avec les utilisateurs abonnés</div>
-
-                <div class="plan-card" id="card-standard_1m">
+                <div class="plan-card" id="card-standard">
                     <div class="plan-left">
                         <div class="plan-icon">📅</div>
                         <div class="plan-info">
-                            <div class="plan-name">1 MOIS STANDARD</div>
-                            <div class="plan-desc">Messagerie illimitée avec abonnés</div>
+                            <div class="plan-name">STANDARD — 9,99€/mois</div>
+                            <div class="plan-desc">Messagerie illimitée · Annulez à tout moment</div>
                         </div>
                     </div>
                     <div class="plan-right">
-                        <a href="#" class="plan-price-btn" id="btn-standard_1m" onclick="subscribe(event,'standard_1m')">€9.99</a>
-                    </div>
-                </div>
-
-                <div class="plan-card" id="card-standard_3m">
-                    <div class="plan-left">
-                        <div class="plan-icon">📅</div>
-                        <div class="plan-info">
-                            <div class="plan-name">3 MOIS STANDARD</div>
-                            <div class="plan-desc">Messagerie illimitée avec abonnés</div>
-                        </div>
-                    </div>
-                    <div class="plan-right">
-                        <div class="plan-savings">Économisez 17%</div>
-                        <a href="#" class="plan-price-btn" id="btn-standard_3m" onclick="subscribe(event,'standard_3m')">€24.99</a>
-                    </div>
-                </div>
-
-                <div class="plan-card" id="card-standard_6m">
-                    <div class="plan-left">
-                        <div class="plan-icon">📅</div>
-                        <div class="plan-info">
-                            <div class="plan-name">6 MOIS STANDARD</div>
-                            <div class="plan-desc">Messagerie illimitée avec abonnés</div>
-                        </div>
-                    </div>
-                    <div class="plan-right">
-                        <div class="plan-savings">Économisez 33%</div>
-                        <a href="#" class="plan-price-btn" id="btn-standard_6m" onclick="subscribe(event,'standard_6m')">€39.99</a>
-                    </div>
-                </div>
-
-                <div class="plan-card" id="card-standard_12m">
-                    <div class="plan-left">
-                        <div class="plan-icon">📅</div>
-                        <div class="plan-info">
-                            <div class="plan-name">12 MOIS STANDARD</div>
-                            <div class="plan-desc">Messagerie illimitée avec abonnés</div>
-                        </div>
-                    </div>
-                    <div class="plan-right">
-                        <div class="plan-savings">Économisez 50%</div>
-                        <a href="#" class="plan-price-btn" id="btn-standard_12m" onclick="subscribe(event,'standard_12m')">€59.99</a>
+                        <a href="#" class="plan-price-btn" onclick="subscribe(event,'standard')">€9.99</a>
                     </div>
                 </div>
             </div>
 
-            <!-- Premium plans -->
+            <!-- Premium -->
             <div class="plans-group">
                 <div class="section-title">⭐ Premium</div>
                 <div class="section-subtitle">Communiquez avec tous les utilisateurs</div>
-
-                <div class="plan-card premium-card" id="card-premium_1m">
+                <div class="plan-card premium-card" id="card-premium">
                     <div class="plan-left">
                         <div class="plan-icon">⭐</div>
                         <div class="plan-info">
-                            <div class="plan-name">1 MOIS PREMIUM</div>
-                            <div class="plan-desc">Tous profils + badge + vedette</div>
+                            <div class="plan-name">PREMIUM — 19,99€/mois</div>
+                            <div class="plan-desc">Tous profils + badge + vedette · Annulez à tout moment</div>
                         </div>
                     </div>
                     <div class="plan-right">
-                        <a href="#" class="plan-price-btn" id="btn-premium_1m" onclick="subscribe(event,'premium_1m')">€19.99</a>
-                    </div>
-                </div>
-
-                <div class="plan-card premium-card" id="card-premium_3m">
-                    <div class="plan-left">
-                        <div class="plan-icon">⭐</div>
-                        <div class="plan-info">
-                            <div class="plan-name">3 MOIS PREMIUM</div>
-                            <div class="plan-desc">Tous profils + badge + vedette</div>
-                        </div>
-                    </div>
-                    <div class="plan-right">
-                        <div class="plan-savings">Économisez 17%</div>
-                        <a href="#" class="plan-price-btn" id="btn-premium_3m" onclick="subscribe(event,'premium_3m')">€49.99</a>
-                    </div>
-                </div>
-
-                <div class="plan-card premium-card" id="card-premium_6m">
-                    <div class="plan-left">
-                        <div class="plan-icon">⭐</div>
-                        <div class="plan-info">
-                            <div class="plan-name">6 MOIS PREMIUM</div>
-                            <div class="plan-desc">Tous profils + badge + vedette</div>
-                        </div>
-                    </div>
-                    <div class="plan-right">
-                        <div class="plan-savings">Économisez 33%</div>
-                        <a href="#" class="plan-price-btn" id="btn-premium_6m" onclick="subscribe(event,'premium_6m')">€79.99</a>
-                    </div>
-                </div>
-
-                <div class="plan-card premium-card" id="card-premium_12m">
-                    <div class="plan-left">
-                        <div class="plan-icon">⭐</div>
-                        <div class="plan-info">
-                            <div class="plan-name">12 MOIS PREMIUM</div>
-                            <div class="plan-desc">Tous profils + badge + vedette</div>
-                        </div>
-                    </div>
-                    <div class="plan-right">
-                        <div class="plan-savings">Économisez 50%</div>
-                        <a href="#" class="plan-price-btn" id="btn-premium_12m" onclick="subscribe(event,'premium_12m')">€119.99</a>
+                        <a href="#" class="plan-price-btn" onclick="subscribe(event,'premium')">€19.99</a>
                     </div>
                 </div>
             </div>
 
             <p style="font-size:0.75rem;color:var(--gray-400);text-align:center;padding-bottom:1rem">
-                Paiement sécurisé par Stripe. Aucun renouvellement automatique.
+                Paiement sécurisé par Stripe. Abonnement mensuel récurrent · Annulez à tout moment.
                 En cas de question : <a href="mailto:contact@desirparent.com">contact@desirparent.com</a>
             </p>
         </div>
     </main>
 
-    <!-- BOTTOM NAV -->
     <nav class="bottom-nav" id="bottomNav" style="display:none">
         <a href="/" class="bottom-nav-item">
             <span class="bottom-nav-icon">🏠</span>
@@ -566,16 +364,9 @@
 
     <script src="/js/app.js"></script>
     <script>
-    // Stripe payment link URLs — updated 2026-04-30 (new pricing, success_url configured)
     const STRIPE_LINKS = {
-        'standard_1m':  'https://buy.stripe.com/00w9AT9Q2fSEdAAehsdlI1U',
-        'standard_3m':  'https://buy.stripe.com/3cIbJ15zMfSE7cc0qCdlI1V',
-        'standard_6m':  'https://buy.stripe.com/6oU3cv7HU0XKdAAddodlI1W',
-        'standard_12m': 'https://buy.stripe.com/28EaEX1jwcGs6888X8dlI1X',
-        'premium_1m':   'https://buy.stripe.com/14A7sLaU65e0aoo2yKdlI1Y',
-        'premium_3m':   'https://buy.stripe.com/dRm3cv1jw5e07ccgpAdlI1Z',
-        'premium_6m':   'https://buy.stripe.com/5kQfZh0fsdKw0NO3COdlI20',
-        'premium_12m':  'https://buy.stripe.com/8x2bJ1aU68qc5444GSdlI21',
+        'standard': 'https://buy.stripe.com/7sYaEYeyl8Jq2aIcIufUQ06',
+        'premium':  'https://buy.stripe.com/dRm14ocqd5xe5mU23QfUQ07'
     };
 
     const defaultPhoto = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect fill='%23E5E7EB' width='200' height='200'/%3E%3Ccircle cx='100' cy='80' r='35' fill='%239CA3AF'/%3E%3Cellipse cx='100' cy='170' rx='55' ry='45' fill='%239CA3AF'/%3E%3C/svg%3E";
@@ -584,7 +375,6 @@
         e.preventDefault();
         const url = STRIPE_LINKS[plan];
         if (!url) return;
-        // Open Stripe payment in same tab
         window.location.href = url;
     }
 
@@ -598,10 +388,8 @@
         const card = document.getElementById('subStatusCard');
         const tierEl = document.getElementById('subStatusTier');
         const expiresEl = document.getElementById('subStatusExpires');
-
         card.className = 'sub-status-card';
         expiresEl.textContent = '';
-
         if (tier === 'premium') {
             card.classList.add('active-premium');
             tierEl.innerHTML = '<span class="tier-badge-premium">⭐ Premium actif</span>';
@@ -616,22 +404,12 @@
         }
     }
 
-    function markCurrentPlan(tier, expiresAt) {
-        // No active plan to highlight
-        if (!tier || tier === 'free' || !expiresAt) return;
-        // We can't know which exact duration they subscribed for, so we just
-        // highlight the tier group header
-    }
-
     document.addEventListener('DOMContentLoaded', async () => {
         const { loggedIn } = await checkAuth();
         updateNav();
-
         document.getElementById('loading').classList.add('hidden');
 
         if (!loggedIn || !currentUser) {
-            // Save pending payment params so activation survives the login redirect.
-            // Without this, returning from Stripe without a session = lost activation.
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('status') === 'success' && urlParams.get('plan')) {
                 localStorage.setItem('dp_pending_plan', urlParams.get('plan'));
@@ -640,19 +418,14 @@
             return;
         }
 
-        // Show bottom nav + load notification badges
         document.getElementById('bottomNav').style.display = '';
-
-        // Populate user header
         document.getElementById('userAvatar').src = currentUser.photo_url || defaultPhoto;
         document.getElementById('userName').textContent = currentUser.name || currentUser.email;
 
-        // Wire logout buttons
         document.querySelectorAll('.logout-btn, .logout-link').forEach(el => {
             el.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
         });
 
-        // Get current subscription
         let tier = 'free';
         let expiresAt = null;
         try {
@@ -664,35 +437,23 @@
 
         renderSubscriptionStatus(tier, expiresAt);
 
-        // Check if returning from Stripe payment (URL params or saved from pre-login)
         const params = new URLSearchParams(window.location.search);
         let planParam = params.get('plan');
         let statusParam = params.get('status');
 
-        // Recover pending activation saved before login redirect
         if (!planParam) {
             const pending = localStorage.getItem('dp_pending_plan');
-            if (pending) {
-                planParam = pending;
-                statusParam = 'success';
-                localStorage.removeItem('dp_pending_plan');
-            }
+            if (pending) { planParam = pending; statusParam = 'success'; localStorage.removeItem('dp_pending_plan'); }
         }
 
         if (statusParam === 'success' && planParam) {
-            // Server-side activation already ran in the GET /compte handler.
-            // Re-fetch status to pick it up; only POST as fallback if still free.
             try {
                 const freshSub = await fetch('/api/subscription/status', { credentials: 'same-origin' });
                 const freshData = await freshSub.json();
-                if (freshData.tier && freshData.tier !== 'free') {
-                    tier = freshData.tier;
-                    expiresAt = freshData.expires_at || null;
-                }
+                if (freshData.tier && freshData.tier !== 'free') { tier = freshData.tier; expiresAt = freshData.expires_at || null; }
             } catch {}
 
             if (tier === 'free') {
-                // Fallback: server-side didn't activate (maybe not logged in during GET)
                 try {
                     const resp = await fetch('/api/subscription/activate', {
                         method: 'POST',
@@ -701,36 +462,26 @@
                         body: JSON.stringify({ plan: planParam })
                     });
                     const data = await resp.json();
-                    if (data.success) {
-                        tier = data.tier;
-                        expiresAt = data.expires_at;
-                    }
-                } catch (err) {
-                    console.error('[compte] Activation fallback failed:', err);
-                }
+                    if (data.success) { tier = data.tier; expiresAt = data.expires_at; }
+                } catch (err) { console.error('[compte] Activation fallback failed:', err); }
             }
 
-            // Clean up localStorage regardless of outcome
             localStorage.removeItem('dp_pending_plan');
 
             if (tier !== 'free') {
                 renderSubscriptionStatus(tier, expiresAt);
                 const banner = document.getElementById('successBanner');
-                const isPremium = tier === 'premium';
-                banner.textContent = isPremium
+                banner.textContent = tier === 'premium'
                     ? '🎉 Abonnement Premium activé ! Vous pouvez maintenant contacter tous les profils.'
                     : '🎉 Abonnement Standard activé ! Messagerie illimitée avec tous les abonnés.';
                 banner.style.display = 'block';
             } else {
-                // Both server-side and client-side activation failed
                 const banner = document.getElementById('successBanner');
                 banner.textContent = '⚠️ Paiement reçu mais activation échouée. Rechargez la page ou contactez-nous.';
                 banner.style.background = '#FEF3CD';
                 banner.style.color = '#856404';
                 banner.style.display = 'block';
             }
-
-            // Clean URL
             window.history.replaceState({}, '', '/compte');
         }
 
